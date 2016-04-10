@@ -1,6 +1,7 @@
 package com.gmail.at.ivanehreshi.menu;
 
 import com.gmail.at.ivanehreshi.Strings;
+import com.gmail.at.ivanehreshi.actions.menu.file.CloseAction;
 
 import javax.swing.*;
 
@@ -15,8 +16,9 @@ public class FileMenuBuilder {
     }
 
     private JMenuItem buildCloseMenu() {
-        JMenuItem menuItemClose = new JMenuItem(Strings.Menu.CLOSE);
+        JMenuItem menuItemClose = new JMenuItem(new CloseAction());
 
         return menuItemClose;
     }
+
 }

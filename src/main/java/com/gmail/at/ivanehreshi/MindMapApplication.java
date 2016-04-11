@@ -1,6 +1,7 @@
 package com.gmail.at.ivanehreshi;
 
 import com.gmail.at.ivanehreshi.menu.MenuBarBuilder;
+import com.gmail.at.ivanehreshi.panels.RootLayoutPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +14,7 @@ public class MindMapApplication extends JFrame {
     public static final Dimension WINDOW_SIZE = new Dimension(500, 600);
 
     public JMenuBar menuBar;
+    public JPanel rootLayoutPanel;
 
     private MindMapApplication() {
         super(FRAME_TITLE);
@@ -28,6 +30,11 @@ public class MindMapApplication extends JFrame {
         menuBar = new MenuBarBuilder().build();
         this.setJMenuBar(menuBar);
         menuBar.setVisible(true); // for clarification
+
+        getContentPane().setLayout(new BorderLayout());
+
+        rootLayoutPanel = new RootLayoutPanel();
+        getContentPane().add(rootLayoutPanel);
 
     }
 

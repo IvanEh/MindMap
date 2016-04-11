@@ -8,8 +8,10 @@ import javax.swing.event.ChangeListener;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.Stack;
 
-public class NodeModel {
+public class NodeModel implements Iterable<NodeModel>{
     private String title;
     private String content;
     private ArrayList<NodeModel> nodes;
@@ -50,11 +52,11 @@ public class NodeModel {
         return false;
     }
 
-    void addChangeListener(ChangeListener l) {
+    public void addChangeListener(ChangeListener l) {
         changeListeners.add(l);
     };
 
-    void removeChangeListener(ChangeListener l) {
+    public void removeChangeListener(ChangeListener l) {
         changeListeners.remove(l);
     }
 
@@ -87,8 +89,16 @@ public class NodeModel {
         fireChangeEvent(event);
     }
 
+    public ArrayList<NodeModel> getNodes() {
+        return nodes;
+    }
+
     protected void fireChangeEvent(ChangeEvent event) {
         changeListeners.forEach((listener) -> listener.stateChanged(event) );
+    }
+
+    public NodeModelIterator iterator() {
+        return new NodeModelIterator();
     }
 
     public static class NodeModelChangeEvent extends ChangeEvent {
@@ -117,6 +127,32 @@ public class NodeModel {
 
         public Object getData() {
             return data;
+        }
+    }
+
+    private class NodeModelIterator implements Iterator<NodeModel> {
+        Stack<NodeModel> nodes = new Stack<>();
+
+        public NodeModelIterator() {
+            nodes.push(NodeModel.this);
+        }
+
+        @Override
+        public boolean hasNext() {
+            return !nodes.empty();
+        }
+
+        @Override
+        public NodeModel next() {
+            if(nodes.empty()) {
+                throw new IndexOutOfBoundsException("Stack underflow");
+            }
+
+            NodeModel ret = nodes.pop();
+            for(NodeModel node: ret.getNodes()) {
+                nodes.push(node);
+            }
+            return ret;
         }
     }
 }

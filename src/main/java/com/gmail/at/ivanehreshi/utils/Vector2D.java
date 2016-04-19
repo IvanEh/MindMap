@@ -75,6 +75,23 @@ public class Vector2D extends Point {
         this.y = y;
     }
 
+    public double dot(Vector2D vec) {
+        return this.x*vec.x + this.y*vec.y;
+    }
+
+    public double angle(Vector2D vec) {
+        double dotVal = dot(vec);
+        double mag1 = this.computeMagnitude();
+        double mag2 = vec.computeMagnitude();
+        return Math.acos(dotVal/(mag1*mag2));
+    }
+
+    public PolarVector asPolarVector() {
+        double magn = computeMagnitude();
+        double phi = Math.acos(y / magn);
+        return new PolarVector(magn, phi);
+    }
+
 
     public enum Axis {
         X,

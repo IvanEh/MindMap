@@ -22,11 +22,11 @@ public class Workspace extends JPanel {
         NodeModel model2 = new NodeModel("Node2", model);
         NodeModel model3 = new NodeModel("Node3", model);
         NodeModel model3_1 = new NodeModel("Node3_1", model3);
-        model3_1.setPolarCoord(0.3, Math.toRadians(30));
+        model3_1.setPolarCoord(30, Math.toRadians(30));
 
-        model1.setPolarCoord(0.2, Math.toRadians(-10));
-        model2.setPolarCoord(0.2, Math.toRadians(45));
-        model3.setPolarCoord(0.2, Math.toRadians(45));
+        model1.setPolarCoord(120, Math.toRadians(0));
+        model2.setPolarCoord(120, Math.toRadians(45));
+        model3.setPolarCoord(120, Math.toRadians(45));
 
 
         model.addNode(model1);

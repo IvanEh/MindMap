@@ -44,7 +44,7 @@ public class MindMapLayout implements LayoutManager {
                 coordSystem = mindMapDrawer.getParent(nodeView).getLocation();
                 if(nodeView.getModel().getIndex() == 0) {
                     Point relPosition = nodeView.getModel()
-                            .computePosition(parent.getWidth(), parent.getHeight());
+                            .computePosition();
                     Point position = new Point();
                     position.x = coordSystem.x + relPosition.x;
                     position.y = coordSystem.y + relPosition.y;
@@ -55,7 +55,7 @@ public class MindMapLayout implements LayoutManager {
                             mindMapDrawer.getNodeViewByModel(nodeView.getModel().getPrev());
                     Point anchorPoint = prevNode.getLocation();
                     double phi = nodeView.getModel().getPhi();
-                    double magnitude = nodeView.getModel().computeMagnitude(parent.getWidth());
+                    double magnitude = nodeView.getModel().getRho();
                     Vector2D vec = new Vector2D(anchorPoint.x - origin.x, anchorPoint.y - origin.y);
                     vec.invertAxis(Vector2D.Axis.Y);
                     vec.rotate(-phi);

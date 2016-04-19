@@ -2,12 +2,9 @@ package com.gmail.at.ivanehreshi.models;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -19,14 +16,14 @@ public class NodeModel implements Iterable<NodeModel>{
     private ArrayList<NodeModel> nodes;
     private ArrayList<ChangeListener> changeListeners;
     private NodeModel parentNode;
-    private double phi;
-    private double rhoNorm;
+    private NodePos nodePos;
 
     public NodeModel(String title) {
         this.title = title;
         this.content = "";
         nodes = new ArrayList<>();
         changeListeners = new ArrayList<>();
+        nodePos = new NodePos();
     }
 
     public NodeModel(String title, NodeModel parentNode) {
@@ -98,26 +95,25 @@ public class NodeModel implements Iterable<NodeModel>{
     }
 
     public double getPhi() {
-        return phi;
+        return nodePos.phi;
     }
 
     public void setPhi(double phi) {
-        this.phi = phi;
+        this.nodePos.phi = phi;
     }
 
-    public double getRhoNorm() {
-        return rhoNorm;
+    public double getRho() {
+        return nodePos.rho;
     }
 
-    public void setRhoNorm(double rhoNorm) {
-        this.rhoNorm = rhoNorm;
+    public void setRho(double rho) {
+        this.nodePos.rho = rho;
     }
 
-    public Point computePosition(int width, int height) {
-        double rho = computeMagnitude(width);
+    public Point computePosition() {
         double phi = computeStdTrigAngle();
-        double x = rho*Math.cos(phi);
-        double y = -rho*Math.sin(phi);
+        double x = getRho()*Math.cos(phi);
+        double y = -getRho()*Math.sin(phi);
         return new Point((int)x, (int)y);
     }
 
@@ -160,8 +156,8 @@ public class NodeModel implements Iterable<NodeModel>{
     }
 
     public void setPolarCoord(double rhoNorm, double phi) {
-        this.rhoNorm = rhoNorm;
-        this.phi = phi;
+        this.nodePos.rho = rhoNorm;
+        this.nodePos.phi = phi;
     }
     @Override
     public String toString() {
@@ -169,12 +165,7 @@ public class NodeModel implements Iterable<NodeModel>{
     }
 
     public double computeStdTrigAngle() {
-        return Math.PI / 2 - phi;
-    }
-
-    public double computeMagnitude(int width) {
-        double rho = rhoNorm * width;
-        return rho;
+        return Math.PI / 2 - nodePos.phi;
     }
 
     public static class NodeModelChangeEvent extends ChangeEvent {

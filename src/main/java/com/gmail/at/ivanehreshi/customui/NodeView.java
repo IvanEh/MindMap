@@ -1,14 +1,13 @@
 package com.gmail.at.ivanehreshi.customui;
 
 import com.gmail.at.ivanehreshi.models.NodeModel;
-import com.sun.java.swing.SwingUtilities3;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 
 public class NodeView extends JPanel {
+    private MindMapDrawer mindMapDrawer;
     protected NodeModel model;
     protected NodeStylesheet stylesheet;
 
@@ -22,9 +21,38 @@ public class NodeView extends JPanel {
         stylesheet = new NodeStylesheet();
     }
 
-    public NodeView(NodeModel model) {
+    public NodeView(NodeModel model, MindMapDrawer mindMapDrawer) {
         this();
         this.model = model;
+        this.mindMapDrawer = mindMapDrawer;
+    }
+
+    public NodeView insertNode(NodeModel model) {
+        if(mindMapDrawer == null) {
+            throw new IllegalStateException("");
+        }
+        Dimension dim = getSize();
+        if(this.getModel().hasChilds()) {
+            getModel().addNodeAtPos(model, 0, props().getMinimumGap());
+        } else {
+            getModel().addNodeAtPos(model, props().getRecommendedLinkLength(), 0);
+        }
+        return mindMapDrawer.onNodeModelInsert(model);
+    }
+
+    public NodeView translate(int dx, int dy) {
+        Point p = this.getLocation();
+        p.translate(dx, dy);
+        this.setLocation(p);
+        if(mindMapDrawer != null) {
+            mindMapDrawer.onViewTranslate(this, dx, dy);
+        }
+
+        return this;
+    }
+
+    public NodeView insertNode(String s) {
+        return insertNode(new NodeModel(s, getModel()));
     }
 
     @Override
@@ -34,6 +62,11 @@ public class NodeView extends JPanel {
         double fontHeight = getFontMetrics(getFont()).getHeight();
         int height = (int) (fontHeight + props().getThickness()*2);
         return new Dimension(width, height);
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return getMinimumSize();
     }
 
     @Override
@@ -65,6 +98,7 @@ public class NodeView extends JPanel {
         //return font;
         return super.getFont();
     }
+
 
     private void drawTitle(Graphics2D g2d) {
         Point textPosition = getAlignedTextPos(g2d);
@@ -113,6 +147,13 @@ public class NodeView extends JPanel {
     public NodeModel getModel() {
         return model;
     }
+
+    public int getBottom() {
+        return (int) getLocation().getY() + (int) getSize().getHeight();
+    }
+
+
+
 
     @Override
     public String toString() {

@@ -1,5 +1,6 @@
 package com.gmail.at.ivanehreshi.customui;
 
+import com.gmail.at.ivanehreshi.models.NodeModel;
 import com.gmail.at.ivanehreshi.utils.Vector2D;
 
 import java.awt.*;
@@ -40,34 +41,25 @@ public class MindMapLayout implements LayoutManager {
                     continue;
                 }
 
-                Point coordSystem;
-                coordSystem = mindMapDrawer.getParent(nodeView).getLocation();
-                if(nodeView.getModel().getIndex() == 0) {
-                    Point relPosition = nodeView.getModel()
-                            .computePosition();
-                    Point position = new Point();
-                    position.x = coordSystem.x + relPosition.x;
-                    position.y = coordSystem.y + relPosition.y;
-                    nodeView.setLocation(position);
-                    nodeView.setSize(nodeView.getMinimumSize());
-                }else {
-                    NodeView prevNode =
-                            mindMapDrawer.getNodeViewByModel(nodeView.getModel().getPrev());
-                    Point anchorPoint = prevNode.getLocation();
-                    double phi = nodeView.getModel().getPhi();
-                    double magnitude = nodeView.getModel().getRho();
-                    Vector2D vec = new Vector2D(anchorPoint.x - origin.x, anchorPoint.y - origin.y);
-                    vec.invertAxis(Vector2D.Axis.Y);
-                    vec.rotate(-phi);
-                    vec.norm();
-                    vec.mult(magnitude);
-                    vec.invertAxis(Vector2D.Axis.Y);
-                    vec.move(origin.getX(), origin.getY());
+                Point anchor;
+                NodeView prevView =
+                        mindMapDrawer.getNodeViewByModel(nodeView.getModel().prevNode());
 
-                    nodeView.setLocation(new Point((int)vec.getX(), (int) vec.getY()));
-                    nodeView.setSize(nodeView.getMinimumSize());
+                if(nodeView.getModel().isRelative()) {
+                    anchor = new Point(prevView.getLocation());
+                    anchor.translate(0, prevView.getHeight());
+                } else {
+                    NodeView parentView =
+                            mindMapDrawer.getNodeViewByModel(nodeView.getModel().getParent());
+                    anchor = new Point(parentView.getLocation());
+                    anchor.translate(parentView.getWidth(), 0);
                 }
 
+                Point nodePos = nodeView.getModel().getNodePos();
+                int x = (int) (anchor.getX() + nodePos.getX());
+                int y = (int) (anchor.getY() +  nodePos.getY()) ;
+                nodeView.setLocation(x, y);
+                nodeView.setSize(nodeView.getMinimumSize());
             }
         }
     }

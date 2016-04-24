@@ -12,6 +12,7 @@ public class MindMapDrawer extends NodeView implements ChangeListener{
     Map<NodeModel, NodeView> modelToViewMap = new HashMap<>();
     private NodeView rootNode;
 
+
     public MindMapDrawer(NodeModel rootModel) {
         super(rootModel, null);
         createGui();
@@ -25,6 +26,10 @@ public class MindMapDrawer extends NodeView implements ChangeListener{
 
     private void createGui() {
 
+    }
+
+    public MindMapLayout getMindMapLayout() {
+        return (MindMapLayout) this.getLayout();
     }
 
     private void createModelProjection() {
@@ -124,6 +129,11 @@ public class MindMapDrawer extends NodeView implements ChangeListener{
         }
     }
 
+    void layoutNode(NodeView view) {
+        MindMapLayout layout = getMindMapLayout();
+        layout.layoutComponent(this, layout.getOrigin(this.getRootNodeView()), view);
+    }
+
     private void onModelMoveDown(NodeView view, int dx, int dy) {
         NodeModel model = view.getModel();
         Point viewLoc = view.getLocation();
@@ -153,33 +163,123 @@ public class MindMapDrawer extends NodeView implements ChangeListener{
         onModelTranslate(viewToTranslate, 0, dy);
     }
 
+    /**
+     * Response to the view translation. This synchronizes the model and
+     * view.
+     * @param view
+     * @param dx
+     * @param dy
+     */
     public void onViewTranslate(NodeView view, int dx, int dy) {
-        if(dy > 0) {
-            view.getModel().getNodePos().translate(dx, dy);
-            this.onModelTranslate(view, dx, dy);
-        } else {
-            if(view.getModel().isRelative()) {
-                NodeModel prevModel = view.getModel().prevNode();
-                NodeView prevView = getNodeViewByModel(prevModel);
-                if(view.getY() > prevView.getBottom()) {
-                    view.getModel().getNodePos().translate(dx, dy);
-                    view.invalidate();
-                    onModelTranslate(view, dx, dy);
-                } else {
-                    Point origLoc = view.getLocation();
-                    origLoc.translate(-dx, -dy);
+        view.getModel().translate(dx, dy);
+        if(!view.getModel().isLast()) {
+            int ind = view.getModel().index();
+            int len = view.getModel().getParent().getNodes().size();
 
-                    NodeModel firstNode = view.getModel().getParent().firstModel();
-                    NodeView firstView = getNodeViewByModel(firstNode);
+            if(dy < 0) {
+                NodeModel nextModel = view.getModel().nextNode();
+                nextModel.translate(0, -dy);
+            }
 
-                    int currModelAbsDy = (int) (origLoc.getY() - prevView.getBottom());
-                    int firstModelAbsDy = -dy - currModelAbsDy + prevView.getHeight();
-                    view.getModel().translate(dx, -currModelAbsDy);
-                    onModelTranslate(view, dx, -currModelAbsDy);
-                    firstView.translate(0, -firstModelAbsDy);
-                }
 
+            for (int i = ind + 1; i < len; i++) {
+                NodeModel currModel = view.getModel().getParent().getNodes().get(i);
+                NodeView modelView = getNodeViewByModel(currModel);
+                layoutNode(modelView);
             }
         }
+
+        this.align(view, dx, dy, true);
+    }
+
+    private void align(NodeView view, Integer dx, Integer dy, boolean validate) {
+        NodeModel model = view.getModel();
+        if(model.isFirst()) {
+            // TODO: dy == 0?
+            if(dy > 0) {
+
+            } else {
+                // Interference with the higher branch, all neighbors need revalidation
+                alignIfInterfereWithUpBranch(view, dx, dy, false);
+            }
+        } else if(model.isRelative()) {
+            // Interference possible only with negative positions
+            alignIfInterfereWithNeighbor(view, dx, dy, false);
+
+        } else if(model.isLast()) {
+            // Interference possible only with the lower branch, no nodes need to be revalidated
+            alignIfInterfereWithLowerBranch(view, dx, dy, false);
+        }
+        if(validate) {
+
+            layoutNode(view); // TODO: revalidate ancestors
+        }
+    }
+
+    private void alignIfInterfereWithLowerBranch(NodeView view, Integer dx, Integer dy, boolean validate) {
+
+    }
+
+    private void alignIfInterfereWithNeighbor(NodeView view, Integer dx, Integer dy, boolean validate) {
+        NodeModel model = view.getModel();
+        int anotherDy = (int) model.getNodePos().getY();
+        if(anotherDy < 0) {
+            model.translate(0, (int) - anotherDy);
+
+            NodeView prevView = getNodeViewByModel(model.prevNode());
+            prevView.translate(0, (int) anotherDy);
+            layoutNode(view);
+        }
+    }
+
+    /**
+     *
+     * @param view
+     * @param dx
+     * @param dy is necessary;it assumed that dy < 0
+     * @param validate
+     */
+    private void alignIfInterfereWithUpBranch(NodeView view, int dx, int dy, boolean validate) {
+        NodeModel model = view.getModel();
+
+        NodeView lowestView = computeSmallerUpperBranchNode(view); // TODO: align against all nodes
+        if(lowestView == null) {
+            return;
+        }
+
+        if(view.getY() < lowestView.getBottom()) {
+            int correction = -view.getY() + lowestView.getBottom();
+            lowestView.translate(0, -correction); // TODO: test against recursive check
+        }
+    }
+
+    public NodeView computeSmallerUpperBranchNode(NodeView view) {
+        NodeModel model0 = view.getModel();
+
+        if(model0.isRootNode()) {
+            return null;
+        }
+
+        NodeModel model = model0.getParent();
+        while (model.getParent() != null && model.prevNode() == null) {
+            model = model.getParent();
+        }
+
+// TODO: return null if not smaller
+        model = model.prevNode();
+        NodeModel lowest = null;
+        NodeView lowestView = null;
+        while (model != null && model.hasChilds() ) {
+            NodeView currView = getNodeViewByModel(model);
+
+            if(currView.getBottom() > view.getY()) { // TODO: opt memory - cache pos
+                lowest = model;
+                lowestView = getNodeViewByModel(lowest);
+                return lowestView;
+            }
+            model = model.lastModel();
+        }
+
+        return null;
     }
 }

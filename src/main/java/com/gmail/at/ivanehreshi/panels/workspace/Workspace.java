@@ -41,18 +41,22 @@ public class Workspace extends JPanel {
         NodeView a = first.insertNode(" A ");
         NodeView b = first.insertNode(" B ");
         NodeView c = first.insertNode(" C ");
+        NodeView d = first.insertNode(" D ");
+
+        b.insertNode(" target 1");
+        b.insertNode("target 2");
 
         NodeView o = c.insertNode("OOO");
 
-        NodeView x = second.insertNode(" X ");
-        NodeView y = second.insertNode(" Y ");
-        NodeView z = second.insertNode(" Z ");
+        //NodeView x = second.insertNode(" X ");
+        //NodeView y = second.insertNode(" Y ");
+        //NodeView z = second.insertNode(" Z ");
 
-        trView = b;
+        trView = o;
 
         mindMapDrawer.doLayout();
         time = System.currentTimeMillis();
-        Timer timer = new Timer(1000, new ActionListener() {
+        Timer timer = new Timer(1500, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 test();
@@ -64,7 +68,7 @@ public class Workspace extends JPanel {
 
     public void test() {
         long delta = System.currentTimeMillis()-time;
-        trView.translate(0, (int) -2);
+        trView.translate(0, (int) -55);
         time = System.currentTimeMillis();
     }
 

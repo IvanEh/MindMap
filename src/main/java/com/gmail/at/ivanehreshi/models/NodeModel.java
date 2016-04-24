@@ -1,10 +1,13 @@
 package com.gmail.at.ivanehreshi.models;
 
+import com.gmail.at.ivanehreshi.utils.Vector2D;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.xml.soap.Node;
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -16,14 +19,14 @@ public class NodeModel implements Iterable<NodeModel>{
     private ArrayList<NodeModel> nodes;
     private ArrayList<ChangeListener> changeListeners;
     private NodeModel parentNode;
-    private NodePos nodePos;
+    private Point nodePos;
 
     public NodeModel(String title) {
         this.title = title;
         this.content = "";
         nodes = new ArrayList<>();
         changeListeners = new ArrayList<>();
-        nodePos = new NodePos();
+        nodePos = new Point();
     }
 
     public NodeModel(String title, NodeModel parentNode) {
@@ -31,8 +34,52 @@ public class NodeModel implements Iterable<NodeModel>{
         this.parentNode = parentNode;
     }
 
-    public void addNode(NodeModel nodeModel) {
+    public NodeModel lastModel() {
+        if(nodes.size() == 0)
+            return null;
+
+        return nodes.get(nodes.size() - 1);
+    }
+
+    public NodeModel firstModel() {
+        if(nodes.size() == 0)
+            return null;
+
+        return nodes.get(0);
+    }
+
+    public NodeModel translate(int dx, int dy) {
+        nodePos.translate(dx, dy);
+        return this;
+    }
+
+    public NodeModel translateAbs(int dx, int dy) {
+        nodePos.translate(dx, dy);
+        if(!isLast() && dy < 0) {
+            nextNode().translate(0, -dy);
+        }
+
+        return this;
+    }
+
+    public boolean isRelative() {
+        return getParent().firstModel() != this;
+    }
+
+    /**
+     * Adds the NodeModel at the given relative position
+     * @param nodeModel
+     * @param dx
+     * @param dy
+     */
+    public void addNodeAtPos(NodeModel nodeModel, int dx, int dy) {
+        nodeModel.setNodePos(new Point(dx, dy));
         nodes.add(nodeModel);
+        nodeModel.parentNode = this;
+    }
+
+    public boolean hasChilds() {
+        return !nodes.isEmpty();
     }
 
     public boolean moveUp() {
@@ -42,6 +89,22 @@ public class NodeModel implements Iterable<NodeModel>{
             return true;
         }
         return false;
+    }
+
+    public int index() {
+        if(isRootNode()) {
+            return 0;
+        }
+        return parentNode.nodes.indexOf(this);
+    }
+
+    public NodeModel prevNode() {
+        int ind = index();
+        if(ind > 0) {
+            return parentNode.nodes.get(ind-1);
+        }
+
+        return null;
     }
 
     public boolean moveDown() {
@@ -94,31 +157,20 @@ public class NodeModel implements Iterable<NodeModel>{
         return nodes;
     }
 
-    public double getPhi() {
-        return nodePos.phi;
-    }
-
-    public void setPhi(double phi) {
-        this.nodePos.phi = phi;
-    }
-
-    public double getRho() {
-        return nodePos.rho;
-    }
-
-    public void setRho(double rho) {
-        this.nodePos.rho = rho;
-    }
-
-    public Point computePosition() {
-        double phi = computeStdTrigAngle();
-        double x = getRho()*Math.cos(phi);
-        double y = -getRho()*Math.sin(phi);
-        return new Point((int)x, (int)y);
+    public Point getPosition() {
+        return new Point((int) nodePos.x, (int) nodePos.y);
     }
 
     protected void fireChangeEvent(ChangeEvent event) {
         changeListeners.forEach((listener) -> listener.stateChanged(event) );
+    }
+
+    public Point getNodePos() {
+        return nodePos;
+    }
+
+    public void setNodePos(Point nodePos) {
+        this.nodePos = nodePos;
     }
 
     // TODO: optimize
@@ -155,17 +207,111 @@ public class NodeModel implements Iterable<NodeModel>{
         return null;
     }
 
-    public void setPolarCoord(double rhoNorm, double phi) {
-        this.nodePos.rho = rhoNorm;
-        this.nodePos.phi = phi;
-    }
     @Override
     public String toString() {
         return this.title;
     }
 
-    public double computeStdTrigAngle() {
-        return Math.PI / 2 - nodePos.phi;
+    public void setPolarCoord(double rho, double phi) {
+
+    }
+
+    public Point computeRelativePosition() {
+        Point parentLoc = getParent().getPosition();
+        Point thisLoc = getPosition();
+        return new Point((int)(thisLoc.getX() - parentLoc.getX()), (int)(thisLoc.getY() - parentLoc.getY()));
+    }
+
+    public boolean isLast() {
+        if(isRootNode()) {
+            return true;
+        }
+
+        return getParent().lastModel() == this;
+    }
+
+    public NodeModel computeFirstLargestLeaning() {
+        if(isRootNode()) {
+            return null;
+        }
+
+        NodeModel model = this.getParent();
+        NodeModel from = this;
+        while (model.getParent() != null && model.nextNode() == null) {
+            from = model;
+            model = model.getParent();
+        }
+
+        model = model.nextNode();
+        NodeModel tallest = model;
+        while (model != null && model.hasChilds()) {
+            if(model.getNodePos().getY() > tallest.getNodePos().getY() || tallest.isRootNode()) { // TODO: opt memory - cache pos
+                tallest = model;
+            }
+            model = model.firstModel();
+        }
+
+        return tallest;
+    }
+
+    public Point computePosition() {
+        Point p = new Point();
+
+        NodeModel model = this;
+        while (!model.isRootNode()) {
+            p.x += model.nodePos.x;
+            p.y += model.nodePos.y;
+            if(model.isRelative()) {
+                model = model.prevNode();
+            }else {
+                model = model.getParent();
+            }
+        }
+        return p;
+    }
+
+    public NodeModel nextNode() {
+        if(isRootNode()) {
+            return null;
+        }
+
+        int ind = index();
+        if(ind < parentNode.getNodes().size()-1) {
+            return parentNode.getNodes().get(ind + 1);
+        }
+
+        return null;
+    }
+
+    public boolean isFirst() {
+        if(isRootNode())
+            return false;
+
+        return getParent().firstModel() == this;
+    }
+
+    public NodeModel computeFirstSmallestUpperLeaning() {
+        if(isRootNode()) {
+            return null;
+        }
+
+        NodeModel model = this.getParent();
+        NodeModel from = this;
+        while (model.getParent() != null && model.prevNode() == null) {
+            from = model;
+            model = model.getParent();
+        }
+
+        model = model.prevNode();
+        NodeModel shortest = model;
+        while (model != null && model.hasChilds()) {
+            if(model.getNodePos().getY() < shortest.getNodePos().getY() || shortest.isRootNode()) { // TODO: opt memory - cache pos
+                shortest = model;
+            }
+            model = model.lastModel();
+        }
+
+        return shortest;
     }
 
     public static class NodeModelChangeEvent extends ChangeEvent {
@@ -174,7 +320,8 @@ public class NodeModel implements Iterable<NodeModel>{
 
         public enum Cause {
             TEXT,
-            CONTENT
+            CONTENT,
+            SIZE
         }
         /**
          * Constructs a ChangeEvent object.

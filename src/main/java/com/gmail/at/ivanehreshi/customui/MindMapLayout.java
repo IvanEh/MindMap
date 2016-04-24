@@ -1,8 +1,5 @@
 package com.gmail.at.ivanehreshi.customui;
 
-import com.gmail.at.ivanehreshi.models.NodeModel;
-import com.gmail.at.ivanehreshi.utils.Vector2D;
-
 import java.awt.*;
 
 public class MindMapLayout implements LayoutManager {
@@ -32,39 +29,43 @@ public class MindMapLayout implements LayoutManager {
         MindMapDrawer mindMapDrawer = (MindMapDrawer) parent;
         Point origin = getOrigin(parent);
         for (Component comp: parent.getComponents()) {
-            if (comp instanceof NodeView) {
-                NodeView nodeView = (NodeView) comp;
-
-                if(nodeView.getModel().isRootNode()) {
-                    nodeView.setLocation(origin); // FIXME: accuracy
-                    nodeView.setSize(nodeView.getMinimumSize());
-                    continue;
-                }
-
-                Point anchor;
-                NodeView prevView =
-                        mindMapDrawer.getNodeViewByModel(nodeView.getModel().prevNode());
-
-                if(nodeView.getModel().isRelative()) {
-                    anchor = new Point(prevView.getLocation());
-                    anchor.translate(0, prevView.getHeight());
-                } else {
-                    NodeView parentView =
-                            mindMapDrawer.getNodeViewByModel(nodeView.getModel().getParent());
-                    anchor = new Point(parentView.getLocation());
-                    anchor.translate(parentView.getWidth(), 0);
-                }
-
-                Point nodePos = nodeView.getModel().getNodePos();
-                int x = (int) (anchor.getX() + nodePos.getX());
-                int y = (int) (anchor.getY() +  nodePos.getY()) ;
-                nodeView.setLocation(x, y);
-                nodeView.setSize(nodeView.getMinimumSize());
-            }
+            layoutComponent(mindMapDrawer, origin, comp);
         }
     }
 
-    private Point getOrigin(Container parent) {
+    void layoutComponent(MindMapDrawer mindMapDrawer, Point origin, Component comp) {
+        if (comp instanceof NodeView) {
+            NodeView nodeView = (NodeView) comp;
+
+            if(nodeView.getModel().isRootNode()) {
+                nodeView.setLocation(origin); // FIXME: accuracy
+                nodeView.setSize(nodeView.getMinimumSize());
+                return;
+            }
+
+            Point anchor;
+            NodeView prevView =
+                    mindMapDrawer.getNodeViewByModel(nodeView.getModel().prevNode());
+
+            if(nodeView.getModel().isRelative()) {
+                anchor = new Point(prevView.getLocation());
+                anchor.translate(0, prevView.getHeight());
+            } else {
+                NodeView parentView =
+                        mindMapDrawer.getNodeViewByModel(nodeView.getModel().getParent());
+                anchor = new Point(parentView.getLocation());
+                anchor.translate(parentView.getWidth(), 0);
+            }
+
+            Point nodePos = nodeView.getModel().getNodePos();
+            int x = (int) (anchor.getX() + nodePos.getX());
+            int y = (int) (anchor.getY() +  nodePos.getY()) ;
+            nodeView.setLocation(x, y);
+            nodeView.setSize(nodeView.getMinimumSize());
+        }
+    }
+
+    Point getOrigin(Container parent) {
         int x = parent.getWidth() / 2;
         int y = parent.getHeight() / 2;
         return new Point(x, y);

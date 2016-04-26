@@ -1,13 +1,10 @@
 package com.gmail.at.ivanehreshi.models;
 
-import com.gmail.at.ivanehreshi.utils.Vector2D;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.xml.soap.Node;
 import java.awt.*;
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -19,14 +16,16 @@ public class NodeModel implements Iterable<NodeModel>{
     private ArrayList<NodeModel> nodes;
     private ArrayList<ChangeListener> changeListeners;
     private NodeModel parentNode;
-    private Point nodePos;
+    private Point pos;
+    private int height = 20;
+    private int width = 50;
 
     public NodeModel(String title) {
         this.title = title;
         this.content = "";
         nodes = new ArrayList<>();
         changeListeners = new ArrayList<>();
-        nodePos = new Point();
+        pos = new Point();
     }
 
     public NodeModel(String title, NodeModel parentNode) {
@@ -48,16 +47,23 @@ public class NodeModel implements Iterable<NodeModel>{
         return nodes.get(0);
     }
 
-    public NodeModel translate(int dx, int dy) {
-        nodePos.translate(dx, dy);
+    public NodeModel translateRel(int dx, int dy) {
+        this.translateAbs(dx, dy);
+        if(!isLast()) {
+            parentNode.nodes.subList(index() + 1, neighborsCnt())
+                      .forEach(node -> node.translateAbs(0, dy));
+        }
+
         return this;
     }
 
+    public int neighborsCnt() {
+        return parentNode.getNodes().size();
+    }
+
     public NodeModel translateAbs(int dx, int dy) {
-        nodePos.translate(dx, dy);
-        if(!isLast() && dy < 0) {
-            nextNode().translate(0, -dy);
-        }
+        pos.translate(dx, dy);
+        nodes.forEach(node -> node.translateAbs(dx, dy));
 
         return this;
     }
@@ -72,16 +78,25 @@ public class NodeModel implements Iterable<NodeModel>{
      * @param dx
      * @param dy
      */
-    public void addNodeAtPos(NodeModel nodeModel, int dx, int dy) {
-        nodeModel.setNodePos(new Point(dx, dy));
+    public void addNodeAtRelPos(NodeModel nodeModel, int dx, int dy) {
+        Point pos = new Point(getNodePos());
+        pos.translate(dx, dy);
+        nodeModel.setNodePos(pos);
         nodes.add(nodeModel);
         nodeModel.parentNode = this;
     }
 
+    public void addNode(NodeModel model) {
+        nodes.add(model);
+        model.parentNode = this;
+    }
+
+    // TODO: fix typo
     public boolean hasChilds() {
         return !nodes.isEmpty();
     }
 
+    @Deprecated
     public boolean moveUp() {
         int index = parentNode.nodes.indexOf(this);
         if(index > 0) {
@@ -107,6 +122,7 @@ public class NodeModel implements Iterable<NodeModel>{
         return null;
     }
 
+    @Deprecated
     public boolean moveDown() {
         int index = parentNode.nodes.indexOf(this);
         if(index != -1 && index != nodes.size()-1) {
@@ -158,7 +174,7 @@ public class NodeModel implements Iterable<NodeModel>{
     }
 
     public Point getPosition() {
-        return new Point((int) nodePos.x, (int) nodePos.y);
+        return new Point((int) pos.x, (int) pos.y);
     }
 
     protected void fireChangeEvent(ChangeEvent event) {
@@ -166,11 +182,11 @@ public class NodeModel implements Iterable<NodeModel>{
     }
 
     public Point getNodePos() {
-        return nodePos;
+        return pos;
     }
 
     public void setNodePos(Point nodePos) {
-        this.nodePos = nodePos;
+        this.pos = new Point(nodePos);
     }
 
     // TODO: optimize
@@ -212,9 +228,6 @@ public class NodeModel implements Iterable<NodeModel>{
         return this.title;
     }
 
-    public void setPolarCoord(double rho, double phi) {
-
-    }
 
     public Point computeRelativePosition() {
         Point parentLoc = getParent().getPosition();
@@ -230,45 +243,31 @@ public class NodeModel implements Iterable<NodeModel>{
         return getParent().lastModel() == this;
     }
 
-    public NodeModel computeFirstLargestLeaning() {
+    public NodeModel computeSmallerUpperBranchNode() {
         if(isRootNode()) {
             return null;
         }
 
-        NodeModel model = this.getParent();
-        NodeModel from = this;
-        while (model.getParent() != null && model.nextNode() == null) {
-            from = model;
+        NodeModel model = getParent();
+        while (model.getParent() != null && model.prevNode() == null) {
             model = model.getParent();
         }
 
-        model = model.nextNode();
-        NodeModel tallest = model;
-        while (model != null && model.hasChilds()) {
-            if(model.getNodePos().getY() > tallest.getNodePos().getY() || tallest.isRootNode()) { // TODO: opt memory - cache pos
-                tallest = model;
+        model = model.prevNode();
+        NodeModel lowest = null;
+        // TODO: has childs redendant
+        while (model != null) {
+
+            if(model.getBottom() > this.getNodePos().getY()) { // TODO: opt memory - cache pos
+                lowest = model;
+                return lowest;
             }
-            model = model.firstModel();
+            model = model.lastModel();
         }
 
-        return tallest;
+        return null;
     }
 
-    public Point computePosition() {
-        Point p = new Point();
-
-        NodeModel model = this;
-        while (!model.isRootNode()) {
-            p.x += model.nodePos.x;
-            p.y += model.nodePos.y;
-            if(model.isRelative()) {
-                model = model.prevNode();
-            }else {
-                model = model.getParent();
-            }
-        }
-        return p;
-    }
 
     public NodeModel nextNode() {
         if(isRootNode()) {
@@ -312,6 +311,78 @@ public class NodeModel implements Iterable<NodeModel>{
         }
 
         return shortest;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    /**
+     *
+     * @param dy > 0
+     */
+    public void translateUp(int dy) {
+        if(isFirst()) {
+            translateAbs(0, -dy);
+            NodeModel smallest = computeSmallerUpperBranchNode();
+            if(smallest != null) {
+                int correction = (int) (smallest.getBottom() - getNodePos().getY());
+                smallest.translateUp(dy);
+            }
+        } else {
+            NodeModel prev = prevNode();
+            translateAbs(0, -dy);
+
+            if(getNodePos().getY() < prev.getBottom()) {
+                int correction = (int) (prev.getBottom() - getNodePos().getY());
+                prev.translateUp(correction);
+            }
+        }
+    }
+
+    public void translateDown(int dy) {
+        translateRel(0, dy);
+        if(isLast()) {
+            NodeModel highest = computeHigherLowerBranchNode();
+            if(highest != null) {
+                int correction = (int) (this.getBottom() - highest.getNodePos().getY());
+                highest.translateDown(correction);
+            }
+        }
+    }
+
+    private NodeModel computeHigherLowerBranchNode() {
+        if(isRootNode()) {
+            return null;
+        }
+
+        NodeModel model = getParent();
+        while (model.getParent() != null && model.nextNode() == null) {
+            model = model.getParent();
+        }
+
+        model = model.nextNode();
+        NodeModel lowest = null;
+        // TODO: has childs redendant
+        while (model != null) {
+
+            if(this.getBottom() > model.getNodePos().getY() ) { // TODO: opt memory - cache pos
+                lowest = model;
+                return lowest;
+            }
+            model = model.lastModel();
+        }
+
+        return null;
+
+    }
+
+    public int getBottom() {
+        return pos.y + height;
     }
 
     public static class NodeModelChangeEvent extends ChangeEvent {

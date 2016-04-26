@@ -76,27 +76,6 @@ public class MindMapDrawer extends NodeView implements ChangeListener{
         return modelToViewMap.get(model);
     }
 
-    // TODO: Чи може медіатор повертати значення?
-    public NodeView onNodeModelInsert(NodeModel model) {
-        NodeView view = this.manageSingleModel(model);
-
-        if(view.getModel().isRelative()) {
-            int halfHeight = view.getPreferredSize().height / 2;
-            view.getModel().getParent().firstModel().getNodePos().translate(0, -halfHeight); // TODO: fire an event
-        }
-
-        return view;
-    }
-
-
-    public void onModelTranslate(NodeView view, int dx, int dy) {
-        if(dy > 0) {
-            onModelMoveDown(view, dx, dy);
-        } else {
-            onModelMoveUp(view, dx, dy);
-        }
-
-    }
 
     private void onModelMoveUp(NodeView view, int dx, int dy) {
         NodeModel model = view.getModel();
@@ -134,34 +113,6 @@ public class MindMapDrawer extends NodeView implements ChangeListener{
         layout.layoutComponent(this, layout.getOrigin(this.getRootNodeView()), view);
     }
 
-    private void onModelMoveDown(NodeView view, int dx, int dy) {
-        NodeModel model = view.getModel();
-        Point viewLoc = view.getLocation();
-
-        for (NodeModel m: model.getNodes()) {
-            getNodeViewByModel(m).revalidate();
-        }
-
-        if(model.isLast()) {
-            NodeModel p = model.computeFirstLargestLeaning();
-            if(p == null) {
-                return;
-            }
-            NodeView leaningView = getNodeViewByModel(p);
-            Point leaningPos = leaningView.getLocation();
-            if(viewLoc.y + view.getHeight() > leaningPos.y) {
-                leaningView.translate(0, viewLoc.y + view.getHeight() - leaningPos.y); // TODO: remove magic number
-            }
-            return;
-        }
-
-
-        NodeModel p = model.nextNode();
-        NodeView viewToTranslate = getNodeViewByModel(p);
-        Point toTranslateLoc = viewToTranslate.getLocation();
-        viewToTranslate.revalidate();
-        onModelTranslate(viewToTranslate, 0, dy);
-    }
 
     /**
      * Response to the view translation. This synchronizes the model and
@@ -171,50 +122,16 @@ public class MindMapDrawer extends NodeView implements ChangeListener{
      * @param dy
      */
     public void onViewTranslate(NodeView view, int dx, int dy) {
-        view.getModel().translate(dx, dy);
-        if(!view.getModel().isLast()) {
-            int ind = view.getModel().index();
-            int len = view.getModel().getParent().getNodes().size();
-
-            if(dy < 0) {
-                NodeModel nextModel = view.getModel().nextNode();
-                nextModel.translate(0, -dy);
-            }
-
-
-            for (int i = ind + 1; i < len; i++) {
-                NodeModel currModel = view.getModel().getParent().getNodes().get(i);
-                NodeView modelView = getNodeViewByModel(currModel);
-                layoutNode(modelView);
-            }
+        view.getModel().translateAbs(dx, 0);
+        if(dy < 0) {
+            view.getModel().translateUp(-dy);
+        } else if(dy > 0) {
+            view.getModel().translateDown(dy);
         }
-
-        this.align(view, dx, dy, true);
+        doLayout();
     }
 
-    private void align(NodeView view, Integer dx, Integer dy, boolean validate) {
-        NodeModel model = view.getModel();
-        if(model.isFirst()) {
-            // TODO: dy == 0?
-            if(dy > 0) {
 
-            } else {
-                // Interference with the higher branch, all neighbors need revalidation
-                alignIfInterfereWithUpBranch(view, dx, dy, false);
-            }
-        } else if(model.isRelative()) {
-            // Interference possible only with negative positions
-            alignIfInterfereWithNeighbor(view, dx, dy, false);
-
-        } else if(model.isLast()) {
-            // Interference possible only with the lower branch, no nodes need to be revalidated
-            alignIfInterfereWithLowerBranch(view, dx, dy, false);
-        }
-        if(validate) {
-
-            layoutNode(view); // TODO: revalidate ancestors
-        }
-    }
 
     private void alignIfInterfereWithLowerBranch(NodeView view, Integer dx, Integer dy, boolean validate) {
 
@@ -224,62 +141,46 @@ public class MindMapDrawer extends NodeView implements ChangeListener{
         NodeModel model = view.getModel();
         int anotherDy = (int) model.getNodePos().getY();
         if(anotherDy < 0) {
-            model.translate(0, (int) - anotherDy);
+            model.translateRel(0, (int) - anotherDy);
 
             NodeView prevView = getNodeViewByModel(model.prevNode());
             prevView.translate(0, (int) anotherDy);
             layoutNode(view);
         }
     }
-
     /**
-     *
+     * Manages the newly created model. Sets its position
      * @param view
-     * @param dx
-     * @param dy is necessary;it assumed that dy < 0
-     * @param validate
+     * @param model
+     * @return
      */
-    private void alignIfInterfereWithUpBranch(NodeView view, int dx, int dy, boolean validate) {
-        NodeModel model = view.getModel();
+    public NodeView onNodeModelInsert(NodeView view, NodeModel model) {
+        Point anchor;
+        boolean hasChildren = view.getModel().hasChilds();
 
-        NodeView lowestView = computeSmallerUpperBranchNode(view); // TODO: align against all nodes
-        if(lowestView == null) {
-            return;
+        NodeView retView = this.manageSingleModel(model);
+
+
+        if(hasChildren) {
+            NodeModel lastModel = view.getModel().lastModel();
+            NodeView lastView = getNodeViewByModel(lastModel);
+
+            view.getModel().addNode(model);
+
+            retView.getModel().setNodePos(lastModel.getNodePos());
+
+            int dy = lastView.getHeight() + props().getMinimumGap();
+            retView.translate(0, dy);
+            lastView.translate(0, -dy);
+        } else {
+            view.getModel().addNode(model);
+
+            retView.getModel().setNodePos(view.getModel().getNodePos());
+            retView.translate(props().getRecommendedLinkLength(), 0);
+            retView.translate(view.getWidth(), 0);
         }
 
-        if(view.getY() < lowestView.getBottom()) {
-            int correction = -view.getY() + lowestView.getBottom();
-            lowestView.translate(0, -correction); // TODO: test against recursive check
-        }
-    }
 
-    public NodeView computeSmallerUpperBranchNode(NodeView view) {
-        NodeModel model0 = view.getModel();
-
-        if(model0.isRootNode()) {
-            return null;
-        }
-
-        NodeModel model = model0.getParent();
-        while (model.getParent() != null && model.prevNode() == null) {
-            model = model.getParent();
-        }
-
-// TODO: return null if not smaller
-        model = model.prevNode();
-        NodeModel lowest = null;
-        NodeView lowestView = null;
-        while (model != null && model.hasChilds() ) {
-            NodeView currView = getNodeViewByModel(model);
-
-            if(currView.getBottom() > view.getY()) { // TODO: opt memory - cache pos
-                lowest = model;
-                lowestView = getNodeViewByModel(lowest);
-                return lowestView;
-            }
-            model = model.lastModel();
-        }
-
-        return null;
+        return retView;
     }
 }

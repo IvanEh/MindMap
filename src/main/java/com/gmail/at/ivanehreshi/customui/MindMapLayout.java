@@ -37,29 +37,9 @@ public class MindMapLayout implements LayoutManager {
         if (comp instanceof NodeView) {
             NodeView nodeView = (NodeView) comp;
 
-            if(nodeView.getModel().isRootNode()) {
-                nodeView.setLocation(origin); // FIXME: accuracy
-                nodeView.setSize(nodeView.getMinimumSize());
-                return;
-            }
-
-            Point anchor;
-            NodeView prevView =
-                    mindMapDrawer.getNodeViewByModel(nodeView.getModel().prevNode());
-
-            if(nodeView.getModel().isRelative()) {
-                anchor = new Point(prevView.getLocation());
-                anchor.translate(0, prevView.getHeight());
-            } else {
-                NodeView parentView =
-                        mindMapDrawer.getNodeViewByModel(nodeView.getModel().getParent());
-                anchor = new Point(parentView.getLocation());
-                anchor.translate(parentView.getWidth(), 0);
-            }
-
             Point nodePos = nodeView.getModel().getNodePos();
-            int x = (int) (anchor.getX() + nodePos.getX());
-            int y = (int) (anchor.getY() +  nodePos.getY()) ;
+            int x = (int) (origin.getX() + nodePos.getX() );
+            int y = (int) (origin.getY() +  nodePos.getY()) ;
             nodeView.setLocation(x, y);
             nodeView.setSize(nodeView.getMinimumSize());
         }

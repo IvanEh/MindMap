@@ -24,6 +24,7 @@ public class NodeView extends JPanel {
     public NodeView(NodeModel model, MindMapDrawer mindMapDrawer) {
         this();
         this.model = model;
+        this.setSize(new Dimension(model.getWidth(), model.getHeight()));
         this.mindMapDrawer = mindMapDrawer;
     }
 
@@ -31,13 +32,8 @@ public class NodeView extends JPanel {
         if(mindMapDrawer == null) {
             throw new IllegalStateException("");
         }
-        Dimension dim = getSize();
-        if(this.getModel().hasChilds()) {
-            getModel().addNodeAtPos(model, 0, props().getMinimumGap());
-        } else {
-            getModel().addNodeAtPos(model, props().getRecommendedLinkLength(), 0);
-        }
-        return mindMapDrawer.onNodeModelInsert(model);
+
+        return mindMapDrawer.onNodeModelInsert(this, model);
     }
 
     public NodeView translate(int dx, int dy) {
@@ -57,11 +53,12 @@ public class NodeView extends JPanel {
 
     @Override
     public Dimension getMinimumSize() {
-        int width =  SwingUtilities.computeStringWidth(this.getFontMetrics(getFont()),
-                    this.getModel().getTitle())*3/2;
-        double fontHeight = getFontMetrics(getFont()).getHeight();
-        int height = (int) (fontHeight + props().getThickness()*2);
-        return new Dimension(width, height);
+//        int width =  SwingUtilities.computeStringWidth(this.getFontMetrics(getFont()),
+//                    this.getModel().getTitle())*3/2;
+//        double fontHeight = getFontMetrics(getFont()).getHeight();
+//        int height = (int) (fontHeight + props().getThickness()*2);
+//        return new Dimension(width, height);
+        return new Dimension(model.getWidth(), model.getHeight());
     }
 
     @Override
@@ -151,7 +148,6 @@ public class NodeView extends JPanel {
     public int getBottom() {
         return (int) getLocation().getY() + (int) getSize().getHeight();
     }
-
 
 
 

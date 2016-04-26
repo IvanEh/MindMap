@@ -7,6 +7,8 @@ public class NodeStylesheet extends Stylesheet{
     public static final String OUTER_MARGIN = "OUTER_MARGIN";
     public static final String INNER_MARGIN = "INNER_MARGIN";
     public static final String FONT_SIZE = "FONT_SIZE";
+    public static final String MINIMUM_GAP = "MINIMUM_GAP";
+    public static final String RECOMMENDED_LINK_LENGTH = "RECOMMENDED_LINK_LENGTH";
 
     {
         put(NODE_COLOR, new Color(84, 51, 116));
@@ -14,6 +16,8 @@ public class NodeStylesheet extends Stylesheet{
         put(OUTER_MARGIN, 1);
         put(INNER_MARGIN, 3);
         put(FONT_SIZE, 12);
+        put(MINIMUM_GAP, 5);
+        put(RECOMMENDED_LINK_LENGTH, 15);
     }
 
     public Color getNodeColor() {
@@ -34,5 +38,13 @@ public class NodeStylesheet extends Stylesheet{
 
     public int getFontSize() {
         return getInteger(FONT_SIZE);
+    }
+
+    public int getMinimumGap() {
+        return getInteger(MINIMUM_GAP);
+    }
+
+    public int getRecommendedLinkLength() {
+        return getInteger(RECOMMENDED_LINK_LENGTH);
     }
 }

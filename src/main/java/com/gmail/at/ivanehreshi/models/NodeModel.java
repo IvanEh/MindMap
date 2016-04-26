@@ -337,7 +337,7 @@ public class NodeModel implements Iterable<NodeModel>{
         } else {
             translateAbs(0, -dy);
             int correction = (int) (prevNode().getBottom() - getNodePos().getY());
-            if(correction > 0) {
+            if(correction >= 0) {
                 prevNode().translateUpRel(correction);
             }
         }
@@ -372,11 +372,16 @@ public class NodeModel implements Iterable<NodeModel>{
         } else {
             translateAbs(0, dy);
             int correction = (int) (getBottom() - nextNode().getNodePos().getY());
-            if(correction > 0) {
+            if(correction >= 0) {
                 nextNode().translateDownRes(correction);
             }
         }
 
+    }
+
+    public void fix() {
+        translateUp(0);
+        translateDown(0);
     }
 
     private NodeModel computeHigherLowerBranchNode() {

@@ -170,6 +170,12 @@ public class MindMapDrawer extends NodeView implements ChangeListener{
             anchor.translate(0, dy);
 
             retView.getModel().setNodePos(anchor);
+
+            int correction = retView.getModel().getBottom() - retView.getModel().prevNode().getNodePos().y;
+            correction /= 4;
+            retView.getModel().getParent().firstModel().translateRel(0, -correction);
+            retView.getModel().getParent().firstModel().fix();
+            retView.getModel().fix();
         } else {
             view.getModel().addNode(model);
 

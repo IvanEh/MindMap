@@ -157,9 +157,7 @@ public class MindMapDrawer extends NodeView implements ChangeListener{
     public NodeView onNodeModelInsert(NodeView view, NodeModel model) {
         Point anchor;
         boolean hasChildren = view.getModel().hasChilds();
-
         NodeView retView = this.manageSingleModel(model);
-
 
         if(hasChildren) {
             NodeModel lastModel = view.getModel().lastModel();
@@ -167,17 +165,19 @@ public class MindMapDrawer extends NodeView implements ChangeListener{
 
             view.getModel().addNode(model);
 
-            retView.getModel().setNodePos(lastModel.getNodePos());
-
+            anchor = new Point(lastModel.getNodePos());
             int dy = lastView.getHeight() + props().getMinimumGap();
-            retView.translate(0, dy);
-            lastView.translate(0, -dy);
+            anchor.translate(0, dy);
+
+            retView.getModel().setNodePos(anchor);
         } else {
             view.getModel().addNode(model);
 
-            retView.getModel().setNodePos(view.getModel().getNodePos());
-            retView.translate(props().getRecommendedLinkLength(), 0);
-            retView.translate(view.getWidth(), 0);
+            anchor = new Point(view.getModel().getNodePos());
+            anchor.translate(props().getRecommendedLinkLength(), 0);
+            anchor.translate(view.getWidth(), 0);
+
+            retView.getModel().setNodePos(anchor);
         }
 
 

@@ -331,28 +331,52 @@ public class NodeModel implements Iterable<NodeModel>{
             NodeModel smallest = computeSmallerUpperBranchNode();
             if(smallest != null) {
                 int correction = (int) (smallest.getBottom() - getNodePos().getY());
-                smallest.translateUp(dy);
+                smallest.translateUp(correction);
+                correction++;
             }
         } else {
-            NodeModel prev = prevNode();
             translateAbs(0, -dy);
-
-            if(getNodePos().getY() < prev.getBottom()) {
-                int correction = (int) (prev.getBottom() - getNodePos().getY());
-                prev.translateUp(correction);
+            int correction = (int) (prevNode().getBottom() - getNodePos().getY());
+            if(correction > 0) {
+                prevNode().translateUpRel(correction);
             }
         }
     }
 
-    public void translateDown(int dy) {
-        translateRel(0, dy);
+    public void translateUpRel(int dy) {
+        if(isFirst()) {
+            translateUp(dy);
+        } else {
+            translateAbs(0, -dy);
+            prevNode().translateUp(dy);
+        }
+    }
+
+    public void translateDownRes(int dy) {
         if(isLast()) {
+            translateDown(dy);
+        } else {
+            translateAbs(0, dy);
+            nextNode().translateDown(dy);
+        }
+    }
+
+    public void translateDown(int dy) {
+        if(isLast()) {
+            translateAbs(0, dy);
             NodeModel highest = computeHigherLowerBranchNode();
             if(highest != null) {
                 int correction = (int) (this.getBottom() - highest.getNodePos().getY());
                 highest.translateDown(correction);
             }
+        } else {
+            translateAbs(0, dy);
+            int correction = (int) (getBottom() - nextNode().getNodePos().getY());
+            if(correction > 0) {
+                nextNode().translateDownRes(correction);
+            }
         }
+
     }
 
     private NodeModel computeHigherLowerBranchNode() {

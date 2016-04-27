@@ -68,6 +68,120 @@ public class NodeModel implements Iterable<NodeModel>{
         return this;
     }
 
+    public NodeModel translateWithAlignment(int dx, int dy) {
+        this.translateAbs(dx, dy);
+        if(dy < 0) {
+            this.fixUp();
+        } else {
+            this.fixDown();
+        }
+        return this;
+    }
+
+    public NodeModel translateUpperNodes(int dx,int dy) {
+        int ind = index();
+        this.translateAbs(dx, dy);
+        parentNode.nodes.subList(0, ind).forEach((node) -> node.translateAbs(0, dy));
+        return this;
+    }
+
+    public NodeModel translateLowerNodes(int dx, int dy) {
+        int ind = index();
+        int len = parentNode.nodes.size();
+
+        this.translateAbs(dx, dy);
+        parentNode.nodes.subList(ind + 1, len).forEach((node) -> node.translateAbs(0, dy));
+        return this;
+    }
+
+    public NodeModel fixUp() {
+        NodeModel upBranch = this.findPrevBranch();
+        if(upBranch == null) {
+            return this;
+        }
+
+        NodeModel lowest = upBranch.findLowest();
+        NodeModel highest = this.findHighest();
+
+        int correction = lowest.getBottom() - highest.getY();
+        if(correction > 0) {
+            upBranch.translateUpperNodes(0, -correction);
+            upBranch.getParent().firstModel().fixUp();
+        }
+
+        return this;
+    }
+
+    public NodeModel fixDown() {
+        NodeModel nextBranch = findNextBranch();
+        if(nextBranch == null)
+            return this;
+
+        NodeModel lowest = this.findLowest();
+        NodeModel highest = nextBranch.findHighest();
+
+        int correction = lowest.getBottom() - highest.getY();
+        if(correction > 0) {
+            nextBranch.translateLowerNodes(0, correction);
+            nextBranch.getParent().lastModel().fixDown();
+        }
+
+        return this;
+    }
+
+    public NodeModel fix0() {
+        fixUp();
+        return fixDown();
+    }
+
+    public NodeModel findPrevBranch() {
+        NodeModel curr = this;
+        while (curr.parentNode != null && curr.prevNode() == null) {
+            curr = curr.parentNode;
+        }
+        if(curr == null || curr.isRootNode())
+            return null;
+
+        return curr.prevNode();
+    }
+
+    public NodeModel findNextBranch() {
+        NodeModel curr = this;
+        while (curr.parentNode != null && curr.nextNode() == null) {
+            curr = curr.parentNode;
+        }
+        if(curr == null || curr.isRootNode())
+            return null;
+
+        return curr.nextNode();
+    }
+
+    public NodeModel findLowest() {
+        NodeModel lowest = this;
+        NodeModel curr = this;
+        while (curr != null) {
+            if(curr.getY() > lowest.getY()) {
+                lowest = curr;
+            }
+            curr = curr.lastModel();
+        }
+
+        return lowest;
+    }
+
+    public NodeModel findHighest() {
+        NodeModel highest = this;
+        NodeModel curr = this;
+        while (curr != null) {
+            if(curr.getY() < highest.getY()) {
+                highest = curr;
+            }
+            curr = curr.firstModel();
+        }
+
+        return highest;
+    }
+
     public boolean isRelative() {
         return getParent().firstModel() != this;
     }
@@ -422,6 +536,10 @@ public class NodeModel implements Iterable<NodeModel>{
 
     public int getBottom() {
         return pos.y + height;
+    }
+
+    public int getY() {
+        return pos.y;
     }
 
     public static class NodeModelChangeEvent extends ChangeEvent {

@@ -294,10 +294,9 @@ public class NodeModel implements Iterable<NodeModel>{
             return null;
         }
 
-        NodeModel model = this.getParent();
+        NodeModel model = this;
         NodeModel from = this;
         while (model.getParent() != null && model.prevNode() == null) {
-            from = model;
             model = model.getParent();
         }
 
@@ -328,17 +327,25 @@ public class NodeModel implements Iterable<NodeModel>{
     public void translateUp(int dy) {
         if(isFirst()) {
             translateAbs(0, -dy);
-            NodeModel smallest = computeSmallerUpperBranchNode();
-            if(smallest != null) {
-                int correction = (int) (smallest.getBottom() - getNodePos().getY());
-                smallest.translateUp(correction);
-                correction++;
-            }
+            NodeModel smallest;
+//            do {
+                smallest = computeSmallerUpperBranchNode();
+                if (smallest != null) {
+                    int correction = (int) (smallest.getBottom() - getNodePos().getY());
+                    smallest.getParent().translateUpRel(correction);
+                    correction++;
+                }
+//            } while(smallest != null);
         } else {
             translateAbs(0, -dy);
-            int correction = (int) (prevNode().getBottom() - getNodePos().getY());
-            if(correction >= 0) {
-                prevNode().translateUpRel(correction);
+            NodeModel prev = computeSmallerUpperBranchNode();
+            if(prev != null) {
+                int correction = (int) (prev.getBottom() - getNodePos().getY());
+                if(correction >= 0) {
+                    prev.translateUpRel(correction);
+                }
+            } else {
+                prevNode().translateUp(dy);
             }
         }
     }
@@ -348,7 +355,7 @@ public class NodeModel implements Iterable<NodeModel>{
             translateUp(dy);
         } else {
             translateAbs(0, -dy);
-            prevNode().translateUp(dy);
+            prevNode().translateUpRel(dy);
         }
     }
 
@@ -364,11 +371,14 @@ public class NodeModel implements Iterable<NodeModel>{
     public void translateDown(int dy) {
         if(isLast()) {
             translateAbs(0, dy);
-            NodeModel highest = computeHigherLowerBranchNode();
-            if(highest != null) {
-                int correction = (int) (this.getBottom() - highest.getNodePos().getY());
-                highest.translateDown(correction);
-            }
+            NodeModel highest;
+            do {
+                highest = computeHigherLowerBranchNode();
+                if (highest != null) {
+                    int correction = (int) (this.getBottom() - highest.getNodePos().getY());
+                    highest.translateDown(correction);
+                }
+            }while (highest != null);
         } else {
             translateAbs(0, dy);
             int correction = (int) (getBottom() - nextNode().getNodePos().getY());
@@ -403,7 +413,7 @@ public class NodeModel implements Iterable<NodeModel>{
                 lowest = model;
                 return lowest;
             }
-            model = model.lastModel();
+            model = model.firstModel();
         }
 
         return null;

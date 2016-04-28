@@ -2,30 +2,37 @@ package com.gmail.at.ivanehreshi.customui;
 
 import com.gmail.at.ivanehreshi.models.NodeModel;
 
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MindMapDrawer extends NodeView implements ChangeListener{
+public class MindMapDrawer extends JPanel implements ChangeListener{
     Map<NodeModel, NodeView> modelToViewMap = new HashMap<>();
-    private NodeView rootNode;
+    NodeView rootNode;
+    NodeModel model;
+    LineManager lineManager;
 
 
     public MindMapDrawer(NodeModel rootModel) {
-        super(rootModel, null);
+        setOpaque(false);
+        this.model = rootModel;
+
+        setLayout(new MindMapLayout());
+        lineManager = new LineManager(this);
+
         createGui();
         createDebugGui();
         createModelProjection();
     }
 
     private void createDebugGui() {
-        setLayout(new MindMapLayout());
     }
 
     private void createGui() {
-
+        
     }
 
     public MindMapLayout getMindMapLayout() {
@@ -60,8 +67,11 @@ public class MindMapDrawer extends NodeView implements ChangeListener{
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
-
+    public void paintComponent(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        lineManager.drawLines((Graphics2D) g);
+        super.paintComponent(g);
     }
 
     public NodeView getRootNodeView() {
@@ -143,6 +153,11 @@ public class MindMapDrawer extends NodeView implements ChangeListener{
             layoutNode(view);
         }
     }
+
+    protected Map<NodeModel, NodeView> getModelToViewMap() {
+        return modelToViewMap;
+    }
+
     /**
      * Manages the newly created model. Sets its position
      * @param view
@@ -160,7 +175,7 @@ public class MindMapDrawer extends NodeView implements ChangeListener{
             NodeModel lowestModel = lastModel.findLowest();
 
             model.setNodePos(new Point(lastModel.getNodePos()));
-            retView.translate(0, lowestModel.getBottom() - model.getY() + props().getMinimumGap());
+            retView.translate(0, lowestModel.getBottom() - model.getY() + view.props().getMinimumGap());
             model.fixDown();
 
             int correction = (model.getBottom() - lastModel.getY() - view.getModel().getHeight())/2;
@@ -168,7 +183,7 @@ public class MindMapDrawer extends NodeView implements ChangeListener{
         } else {
 
             anchor = new Point(view.getModel().getNodePos());
-            anchor.translate(props().getRecommendedLinkLength(), 0);
+            anchor.translate(view.props().getRecommendedLinkLength(), 0);
             anchor.translate(view.getWidth(), 0);
 
             retView.getModel().setNodePos(anchor);

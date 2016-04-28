@@ -122,7 +122,7 @@ public class MindMapDrawer extends NodeView implements ChangeListener{
      * @param dy
      */
     public void onViewTranslate(NodeView view, int dx, int dy) {
-        view.getModel().translateWithAlignment(dx, dy);
+        view.getModel().translateAbsWithAlignment(dx, dy);
         doLayout();
     }
 
@@ -159,10 +159,12 @@ public class MindMapDrawer extends NodeView implements ChangeListener{
             NodeModel lastModel = view.getModel().lastModel().prevNode();
             NodeModel lowestModel = lastModel.findLowest();
 
-
             model.setNodePos(new Point(lastModel.getNodePos()));
             retView.translate(0, lowestModel.getBottom() - model.getY() + props().getMinimumGap());
             model.fixDown();
+
+            int correction = (model.getBottom() - lastModel.getY() - view.getModel().getHeight())/2;
+            view.getModel().firstModel().translateRelWithAlignment(0, -correction);
         } else {
 
             anchor = new Point(view.getModel().getNodePos());

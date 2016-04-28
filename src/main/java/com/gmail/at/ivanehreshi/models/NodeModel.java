@@ -68,7 +68,7 @@ public class NodeModel implements Iterable<NodeModel>{
         return this;
     }
 
-    public NodeModel translateWithAlignment(int dx, int dy) {
+    public NodeModel translateAbsWithAlignment(int dx, int dy) {
         this.translateAbs(dx, dy);
         if(dy < 0) {
             this.fixUp();
@@ -76,6 +76,17 @@ public class NodeModel implements Iterable<NodeModel>{
             this.fixDown();
         }
         return this;
+    }
+
+    public NodeModel translateRelWithAlignment(int dx, int dy) {
+        this.translateRel(dx, dy);
+        if(dy < 0) {
+            this.fixUp();
+        } else {
+            this.fixDown();
+        }
+        return this;
+
     }
 
     public NodeModel translateUpperNodes(int dx,int dy) {

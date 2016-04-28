@@ -1,5 +1,6 @@
 package com.gmail.at.ivanehreshi.customui;
 
+import com.gmail.at.ivanehreshi.customui.controllers.NodeViewController;
 import com.gmail.at.ivanehreshi.models.NodeModel;
 
 import javax.swing.*;
@@ -12,10 +13,18 @@ public class NodeView extends JPanel {
 
     public NodeView(boolean dummy) {
         model = new NodeModel("Root");
+
     }
 
     private NodeView() {
         setOpaque(false);
+        setUpControllers();
+    }
+
+    protected void setUpControllers() {
+        NodeViewController nodeViewController = new NodeViewController();
+        addMouseListener(nodeViewController);
+        addMouseMotionListener(nodeViewController);
     }
 
     public NodeView(NodeModel model, MindMapController mindMapController) {

@@ -122,12 +122,7 @@ public class MindMapDrawer extends NodeView implements ChangeListener{
      * @param dy
      */
     public void onViewTranslate(NodeView view, int dx, int dy) {
-        view.getModel().translateAbs(dx, 0);
-        if(dy < 0) {
-            view.getModel().translateUp(-dy);
-        } else if(dy > 0) {
-            view.getModel().translateDown(dy);
-        }
+        view.getModel().translateWithAlignment(dx, dy);
         doLayout();
     }
 
@@ -159,25 +154,16 @@ public class MindMapDrawer extends NodeView implements ChangeListener{
         boolean hasChildren = view.getModel().hasChilds();
         NodeView retView = this.manageSingleModel(model);
 
+        view.getModel().addNode(model);
         if(hasChildren) {
-            NodeModel lastModel = view.getModel().lastModel();
-            NodeView lastView = getNodeViewByModel(lastModel);
+            NodeModel lastModel = view.getModel().lastModel().prevNode();
+            NodeModel lowestModel = lastModel.findLowest();
 
-            view.getModel().addNode(model);
 
-            anchor = new Point(lastModel.getNodePos());
-            int dy = lastView.getHeight() + props().getMinimumGap();
-            anchor.translate(0, dy);
-
-            retView.getModel().setNodePos(anchor);
-
-            int correction = retView.getModel().getBottom() - retView.getModel().prevNode().getNodePos().y;
-            correction /= 4;
-            retView.getModel().getParent().firstModel().translateRel(0, -correction);
-            retView.getModel().getParent().firstModel().fix();
-            retView.getModel().fix();
+            model.setNodePos(new Point(lastModel.getNodePos()));
+            retView.translate(0, lowestModel.getBottom() - model.getY() + props().getMinimumGap());
+            model.fixDown();
         } else {
-            view.getModel().addNode(model);
 
             anchor = new Point(view.getModel().getNodePos());
             anchor.translate(props().getRecommendedLinkLength(), 0);

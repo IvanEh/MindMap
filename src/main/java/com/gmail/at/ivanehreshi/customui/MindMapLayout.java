@@ -26,14 +26,14 @@ public class MindMapLayout implements LayoutManager {
 
     @Override
     public void layoutContainer(Container parent) {
-        MindMapDrawer mindMapDrawer = (MindMapDrawer) parent;
+        MindMapController mindMapController = (MindMapController) parent;
         Point origin = getOrigin(parent);
         for (Component comp: parent.getComponents()) {
-            layoutComponent(mindMapDrawer, origin, comp);
+            layoutComponent(mindMapController, origin, comp);
         }
     }
 
-    void layoutComponent(MindMapDrawer mindMapDrawer, Point origin, Component comp) {
+    void layoutComponent(MindMapController mindMapController, Point origin, Component comp) {
         if (comp instanceof NodeView) {
             NodeView nodeView = (NodeView) comp;
 

@@ -7,7 +7,7 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
 public class NodeView extends JPanel {
-    private MindMapDrawer mindMapDrawer;
+    private MindMapController mindMapController;
     protected NodeModel model;
 
     public NodeView(boolean dummy) {
@@ -18,29 +18,29 @@ public class NodeView extends JPanel {
         setOpaque(false);
     }
 
-    public NodeView(NodeModel model, MindMapDrawer mindMapDrawer) {
+    public NodeView(NodeModel model, MindMapController mindMapController) {
         this();
         this.model = model;
         this.setSize(new Dimension(model.getWidth(), model.getHeight()));
-        this.mindMapDrawer = mindMapDrawer;
+        this.mindMapController = mindMapController;
 
         setFont(model.getCachedFont());
     }
 
     public NodeView insertNode(NodeModel model) {
-        if(mindMapDrawer == null) {
+        if(mindMapController == null) {
             throw new IllegalStateException("");
         }
 
-        return mindMapDrawer.onNodeModelInsert(this, model);
+        return mindMapController.onNodeModelInsert(this, model);
     }
 
     public NodeView translate(int dx, int dy) {
         Point p = this.getLocation();
         p.translate(dx, dy);
         this.setLocation(p);
-        if(mindMapDrawer != null) {
-            mindMapDrawer.onViewTranslate(this, dx, dy);
+        if(mindMapController != null) {
+            mindMapController.onViewTranslate(this, dx, dy);
         }
 
         return this;

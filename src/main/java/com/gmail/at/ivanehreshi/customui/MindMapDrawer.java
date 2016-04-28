@@ -9,7 +9,7 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MindMapDrawer extends JPanel implements ChangeListener{
+public class MindMapDrawer extends JPanel implements MindMapController {
     Map<NodeModel, NodeView> modelToViewMap = new HashMap<>();
     NodeView rootNode;
     NodeModel model;
@@ -131,6 +131,7 @@ public class MindMapDrawer extends JPanel implements ChangeListener{
      * @param dx
      * @param dy
      */
+    @Override
     public void onViewTranslate(NodeView view, int dx, int dy) {
         view.getModel().translateAbsWithAlignment(dx, dy);
         doLayout();
@@ -164,6 +165,7 @@ public class MindMapDrawer extends JPanel implements ChangeListener{
      * @param model
      * @return
      */
+    @Override
     public NodeView onNodeModelInsert(NodeView view, NodeModel model) {
         Point anchor;
         boolean hasChildren = view.getModel().hasChilds();

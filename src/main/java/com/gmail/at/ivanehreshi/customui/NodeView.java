@@ -23,6 +23,8 @@ public class NodeView extends JPanel {
         this.model = model;
         this.setSize(new Dimension(model.getWidth(), model.getHeight()));
         this.mindMapDrawer = mindMapDrawer;
+
+        setFont(model.getCachedFont());
     }
 
     public NodeView insertNode(NodeModel model) {
@@ -50,11 +52,6 @@ public class NodeView extends JPanel {
 
     @Override
     public Dimension getMinimumSize() {
-//        int width =  SwingUtilities.computeStringWidth(this.getFontMetrics(getFont()),
-//                    this.getModel().getTitle())*3/2;
-//        double fontHeight = getFontMetrics(getFont()).getHeight();
-//        int height = (int) (fontHeight + props().getThickness()*2);
-//        return new Dimension(width, height);
         return new Dimension(model.getWidth(), model.getHeight());
     }
 
@@ -67,6 +64,7 @@ public class NodeView extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         getParent().repaint(); // FIXME: malicious
+
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -77,8 +75,6 @@ public class NodeView extends JPanel {
         int nodeThickness = getModel().getProps().getThickness();
         int outerBorder = getModel().getProps().getOuterMargin();
 
-        g2d.setFont(getFont().deriveFont(getModel().getProps().getFontSize()));
-
         g2d.setColor(getModel().getProps().getNodeColor());
         g2d.setStroke(new BasicStroke(nodeThickness));
         g2d.drawRoundRect(outerBorder + nodeThickness/2, outerBorder + nodeThickness/2,
@@ -87,13 +83,6 @@ public class NodeView extends JPanel {
 
         drawTitle(g2d);
     }
-
-    public Font getFont() {
-        //Font font = new Font("Ubuntu", Font.PLAIN, stylesheet.getFontSize());
-        //return font;
-        return super.getFont();
-    }
-
 
     private void drawTitle(Graphics2D g2d) {
         Point textPosition = getAlignedTextPos(g2d);

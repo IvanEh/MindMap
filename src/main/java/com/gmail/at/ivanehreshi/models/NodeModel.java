@@ -3,10 +3,11 @@ package com.gmail.at.ivanehreshi.models;
 import com.gmail.at.ivanehreshi.customui.NodeStylesheet;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -22,6 +23,7 @@ public class NodeModel implements Iterable<NodeModel>{
     private Point pos;
     private int height = 20;
     private int width = 50;
+    private Font cachedFont;
 
     public NodeModel(String title) {
         this.title = title;
@@ -30,6 +32,25 @@ public class NodeModel implements Iterable<NodeModel>{
         changeListeners = new ArrayList<>();
         pos = new Point();
         props = new NodeStylesheet();
+
+        cacheFont();
+        updateModelPreferredSize();
+    }
+
+    private void updateModelPreferredSize() {
+        AffineTransform affinetransform = getCachedFont().getTransform();
+        FontRenderContext frc = new FontRenderContext(affinetransform,true,true);
+        int textwidth = (int)(getCachedFont().getStringBounds(title, frc).getWidth());
+        int textheight = (int)(getCachedFont().getStringBounds(title, frc).getHeight());
+        this.height = Math.max(textheight + computeTotalInset()*2, getProps().getMinimumHeight());
+        this.width = Math.max(textwidth*3/2, getProps().getMinimumWidth());
+    }
+
+    public Font cacheFont() {
+        if(cachedFont == null) {
+            cachedFont = new Font(getProps().getFontName(), Font.PLAIN, getProps().getFontSize());
+        }
+        return cachedFont;
     }
 
     public NodeModel(String title, NodeModel parentNode) {
@@ -468,6 +489,10 @@ public class NodeModel implements Iterable<NodeModel>{
         return getParent().firstModel() == this;
     }
 
+    public int computeTotalInset() {
+        return getProps().getThickness() + getProps().getInnerMargin();
+    }
+
     public NodeModel computeFirstSmallestUpperLeaning() {
         if(isRootNode()) {
             return null;
@@ -617,6 +642,10 @@ public class NodeModel implements Iterable<NodeModel>{
 
     public void setProps(NodeStylesheet props) {
         this.props = props;
+    }
+
+    public Font getCachedFont() {
+        return cachedFont;
     }
 
     public static class NodeModelChangeEvent extends ChangeEvent {

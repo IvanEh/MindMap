@@ -9,6 +9,9 @@ public class NodeStylesheet extends Stylesheet{
     public static final String FONT_SIZE = "FONT_SIZE";
     public static final String MINIMUM_GAP = "MINIMUM_GAP";
     public static final String RECOMMENDED_LINK_LENGTH = "RECOMMENDED_LINK_LENGTH";
+    public static final String FONT_NAME = "FONT_NAME";
+    public static final String MINIMUM_HEIGHT = "MINIMUM_HEIGHT";
+    public static final String MINIMUM_WIDTH = "MINIMUM_WIDTH";
 
     {
         put(NODE_COLOR, new Color(84, 51, 116));
@@ -18,6 +21,9 @@ public class NodeStylesheet extends Stylesheet{
         put(FONT_SIZE, 12);
         put(MINIMUM_GAP, 5);
         put(RECOMMENDED_LINK_LENGTH, 15);
+        put(FONT_NAME, "Ubuntu");
+        put(MINIMUM_HEIGHT, 25);
+        put(MINIMUM_WIDTH, 50);
     }
 
     public Color getNodeColor() {
@@ -46,5 +52,17 @@ public class NodeStylesheet extends Stylesheet{
 
     public int getRecommendedLinkLength() {
         return getInteger(RECOMMENDED_LINK_LENGTH);
+    }
+
+    public String getFontName() {
+        return (String) get(FONT_NAME);
+    }
+
+    public int getMinimumHeight() {
+        return (int) get(MINIMUM_HEIGHT);
+    }
+
+    public int getMinimumWidth() {
+        return (int) get(MINIMUM_WIDTH);
     }
 }

@@ -32,7 +32,7 @@ public class MindMapDrawer extends JPanel implements ChangeListener{
     }
 
     private void createGui() {
-        
+
     }
 
     public MindMapLayout getMindMapLayout() {
@@ -175,7 +175,7 @@ public class MindMapDrawer extends JPanel implements ChangeListener{
             NodeModel lowestModel = lastModel.findLowest();
 
             model.setNodePos(new Point(lastModel.getNodePos()));
-            retView.translate(0, lowestModel.getBottom() - model.getY() + view.props().getMinimumGap());
+            retView.translate(0, lowestModel.getBottom() - model.getY() + view.getModel().getProps().getMinimumGap());
             model.fixDown();
 
             int correction = (model.getBottom() - lastModel.getY() - view.getModel().getHeight())/2;
@@ -183,7 +183,7 @@ public class MindMapDrawer extends JPanel implements ChangeListener{
         } else {
 
             anchor = new Point(view.getModel().getNodePos());
-            anchor.translate(view.props().getRecommendedLinkLength(), 0);
+            anchor.translate(view.getModel().getProps().getRecommendedLinkLength(), 0);
             anchor.translate(view.getWidth(), 0);
 
             retView.getModel().setNodePos(anchor);

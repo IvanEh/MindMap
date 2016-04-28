@@ -1,5 +1,6 @@
 package com.gmail.at.ivanehreshi.models;
 
+import com.gmail.at.ivanehreshi.customui.NodeStylesheet;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.*;
@@ -17,6 +18,7 @@ public class NodeModel implements Iterable<NodeModel>{
     private ArrayList<NodeModel> nodes;
     private ArrayList<ChangeListener> changeListeners;
     private NodeModel parentNode;
+    private NodeStylesheet props;
     private Point pos;
     private int height = 20;
     private int width = 50;
@@ -27,6 +29,7 @@ public class NodeModel implements Iterable<NodeModel>{
         nodes = new ArrayList<>();
         changeListeners = new ArrayList<>();
         pos = new Point();
+        props = new NodeStylesheet();
     }
 
     public NodeModel(String title, NodeModel parentNode) {
@@ -606,6 +609,14 @@ public class NodeModel implements Iterable<NodeModel>{
 
     public int getX() {
         return pos.x;
+    }
+
+    public NodeStylesheet getProps() {
+        return props;
+    }
+
+    public void setProps(NodeStylesheet props) {
+        this.props = props;
     }
 
     public static class NodeModelChangeEvent extends ChangeEvent {

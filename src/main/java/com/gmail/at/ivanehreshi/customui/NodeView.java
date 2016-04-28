@@ -9,16 +9,13 @@ import java.awt.geom.Rectangle2D;
 public class NodeView extends JPanel {
     private MindMapDrawer mindMapDrawer;
     protected NodeModel model;
-    protected NodeStylesheet stylesheet;
 
     public NodeView(boolean dummy) {
         model = new NodeModel("Root");
-        stylesheet = new NodeStylesheet();
     }
 
     private NodeView() {
         setOpaque(false);
-        stylesheet = new NodeStylesheet();
     }
 
     public NodeView(NodeModel model, MindMapDrawer mindMapDrawer) {
@@ -77,12 +74,12 @@ public class NodeView extends JPanel {
             return;
         }
 
-        int nodeThickness = stylesheet.getThickness();
-        int outerBorder = stylesheet.getOuterMargin();
+        int nodeThickness = getModel().getProps().getThickness();
+        int outerBorder = getModel().getProps().getOuterMargin();
 
-        g2d.setFont(getFont().deriveFont(stylesheet.getFontSize()));
+        g2d.setFont(getFont().deriveFont(getModel().getProps().getFontSize()));
 
-        g2d.setColor(stylesheet.getNodeColor());
+        g2d.setColor(getModel().getProps().getNodeColor());
         g2d.setStroke(new BasicStroke(nodeThickness));
         g2d.drawRoundRect(outerBorder + nodeThickness/2, outerBorder + nodeThickness/2,
                 this.getWidth()-2*outerBorder - nodeThickness, this.getHeight()-2*outerBorder - nodeThickness, 10, 10);
@@ -119,7 +116,7 @@ public class NodeView extends JPanel {
     }
 
     private Rectangle2D getTextArea() {
-        double x = stylesheet.getOuterMargin() + stylesheet.getThickness() + stylesheet.getInnerMargin();
+        double x = getModel().getProps().getOuterMargin() + getModel().getProps().getThickness() + getModel().getProps().getInnerMargin();
         double y = x;
         double width = this.getWidth() - 2*x;
         double height = this.getHeight() - 2*y;
@@ -127,20 +124,13 @@ public class NodeView extends JPanel {
     }
 
     public Rectangle2D getMaximumTextArea() {
-        double x = stylesheet.getThickness();
+        double x = getModel().getProps().getThickness();
         double y = x;
         double width = this.getWidth() - 2*x;
         double height = this.getHeight() - 2*y - 1;
         return new Rectangle2D.Double(x, y, width, height);
     }
 
-    protected NodeStylesheet props() {
-        return stylesheet;
-    }
-
-    public Object prop(String p) {
-        return props().get(p);
-    }
 
     public NodeModel getModel() {
         return model;

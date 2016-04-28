@@ -2,6 +2,7 @@ package com.gmail.at.ivanehreshi.models;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
@@ -105,6 +106,29 @@ public class NodeModel implements Iterable<NodeModel>{
         return this;
     }
 
+    /**
+     * Moves the node to the specified position with its children
+     * Doesn't do alignment and don't move upper or higher nodes
+     * @param x
+     * @param y
+     * @return current instance of node
+     */
+    public NodeModel moveTo(int x, int y) {
+        int dx = x - pos.x;
+        int dy = y - pos.y;
+        translateAbs(dx, dy);
+        return this;
+    }
+
+    /**
+     *  Does exactly what @see moveTo(int x,int y) do
+     * @param p
+     * @return
+     */
+    public NodeModel moveTo(Point p) {
+        return moveTo(p.x, p.y);
+    }
+
     public NodeModel fixUp() {
         NodeModel upBranch = this.findPrevBranch();
         if(upBranch == null) {
@@ -193,6 +217,13 @@ public class NodeModel implements Iterable<NodeModel>{
         return highest;
     }
 
+    public Rectangle computeNodeInvariantBounds() {
+        NodeModel highest = findHighest();
+        NodeModel lowest = findLowest();
+        return new Rectangle(highest.getX(), highest.getY(),
+                0, lowest.getBottom() - highest.getY());
+    }
+
     public boolean isRelative() {
         return getParent().firstModel() != this;
     }
@@ -247,12 +278,32 @@ public class NodeModel implements Iterable<NodeModel>{
         return null;
     }
 
-    @Deprecated
-    public boolean moveDown() {
+    public boolean swapDown() {
         int index = parentNode.nodes.indexOf(this);
-        if(index != -1 && index != nodes.size()-1) {
-            Collections.swap(nodes, index, index+1);
+        if(index != -1 && index != neighborsCnt()-1) {
+            NodeModel currNode = this;
+            NodeModel nextNode = parentNode.nodes.get(index + 1);
+
+            Rectangle currRect = currNode.computeNodeInvariantBounds();
+            Rectangle nextRect = nextNode.computeNodeInvariantBounds();
+
+            int currCorrection = (int) (nextRect.getMaxY() - currRect.getMaxY());
+            int nextCorrection = (int) (nextRect.getY() - currRect.getY());
+
+            currNode.translateAbs(0, currCorrection);
+            nextNode.translateAbs(0, -nextCorrection);
+
+            Collections.swap(getParent().nodes, index, index+1);
             return true;
+        }
+        return false;
+    }
+
+    public boolean swapUp() {
+        int index = parentNode.nodes.indexOf(this);
+        if(index != -1 && index != 0) {
+            NodeModel prevNode = parentNode.nodes.get(index - 1);
+            return prevNode.swapDown();
         }
         return false;
     }
@@ -551,6 +602,10 @@ public class NodeModel implements Iterable<NodeModel>{
 
     public int getY() {
         return pos.y;
+    }
+
+    public int getX() {
+        return pos.x;
     }
 
     public static class NodeModelChangeEvent extends ChangeEvent {

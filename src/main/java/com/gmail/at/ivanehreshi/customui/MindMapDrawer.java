@@ -4,7 +4,6 @@ import com.gmail.at.ivanehreshi.models.NodeModel;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -87,37 +86,6 @@ public class MindMapDrawer extends JPanel implements MindMapController {
     }
 
 
-    private void onModelMoveUp(NodeView view, int dx, int dy) {
-        NodeModel model = view.getModel();
-        Point viewLoc = view.getLocation();
-
-//        view.revalidate();
-        for (NodeModel m: model.getNodes()) {
-            getNodeViewByModel(m).revalidate();
-        }
-
-        if(model.isFirst()) {
-            NodeModel p = model.computeFirstSmallestUpperLeaning();
-            if(p == null) {
-                return;
-            }
-            NodeView leaningView = getNodeViewByModel(p);
-            Point leaningPos = leaningView.getLocation();
-            if(viewLoc.y < leaningPos.y) {
-                leaningView.translate(0, viewLoc.y - leaningPos.y); // TODO: remove magic number
-            }
-            return;
-        }
-
-
-        NodeModel p = model.prevNode();
-        NodeView viewToTranslate = getNodeViewByModel(p);
-        Point toTranslateLoc = viewToTranslate.getLocation();
-        if(viewLoc.y < toTranslateLoc.y + viewToTranslate.getHeight()) {
-            viewToTranslate.translate(0, viewLoc.y - toTranslateLoc.y - viewToTranslate.getHeight());
-        }
-    }
-
     void layoutNode(NodeView view) {
         MindMapLayout layout = getMindMapLayout();
         layout.layoutComponent(this, layout.getOrigin(this.getRootNodeView()), view);
@@ -168,7 +136,7 @@ public class MindMapDrawer extends JPanel implements MindMapController {
     @Override
     public NodeView onNodeModelInsert(NodeView view, NodeModel model) {
         Point anchor;
-        boolean hasChildren = view.getModel().hasChilds();
+        boolean hasChildren = view.getModel().hasChildren();
         NodeView retView = this.manageSingleModel(model);
 
         view.getModel().addNode(model);

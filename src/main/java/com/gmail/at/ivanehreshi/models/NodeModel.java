@@ -272,18 +272,8 @@ public class NodeModel implements Iterable<NodeModel>{
     }
 
     // TODO: fix typo
-    public boolean hasChilds() {
+    public boolean hasChildren() {
         return !nodes.isEmpty();
-    }
-
-    @Deprecated
-    public boolean moveUp() {
-        int index = parentNode.nodes.indexOf(this);
-        if(index > 0) {
-            Collections.swap(nodes, index, index-1);
-            return true;
-        }
-        return false;
     }
 
     public int index() {
@@ -389,15 +379,6 @@ public class NodeModel implements Iterable<NodeModel>{
         this.pos = new Point(nodePos);
     }
 
-    // TODO: optimize
-    public int getIndex() {
-        if (parentNode == null) {
-            return 0;
-        }
-
-        return parentNode.getNodes().indexOf(this);
-    }
-
     public boolean isRootNode() {
         return parentNode == null;
     }
@@ -415,7 +396,7 @@ public class NodeModel implements Iterable<NodeModel>{
             return null;
         }
 
-        int index = getIndex();
+        int index = index();
         if(index != 0) {
             return getParent().getNodes().get(index - 1);
         }
@@ -493,29 +474,6 @@ public class NodeModel implements Iterable<NodeModel>{
         return getProps().getThickness() + getProps().getInnerMargin();
     }
 
-    public NodeModel computeFirstSmallestUpperLeaning() {
-        if(isRootNode()) {
-            return null;
-        }
-
-        NodeModel model = this;
-        NodeModel from = this;
-        while (model.getParent() != null && model.prevNode() == null) {
-            model = model.getParent();
-        }
-
-        model = model.prevNode();
-        NodeModel shortest = model;
-        while (model != null && model.hasChilds()) {
-            if(model.getNodePos().getY() < shortest.getNodePos().getY() || shortest.isRootNode()) { // TODO: opt memory - cache pos
-                shortest = model;
-            }
-            model = model.lastModel();
-        }
-
-        return shortest;
-    }
-
     public int getHeight() {
         return height;
     }
@@ -524,105 +482,6 @@ public class NodeModel implements Iterable<NodeModel>{
         return width;
     }
 
-    /**
-     *
-     * @param dy > 0
-     */
-    public void translateUp(int dy) {
-        if(isFirst()) {
-            translateAbs(0, -dy);
-            NodeModel smallest;
-//            do {
-                smallest = computeSmallerUpperBranchNode();
-                if (smallest != null) {
-                    int correction = (int) (smallest.getBottom() - getNodePos().getY());
-                    smallest.getParent().translateUpRel(correction);
-                    correction++;
-                }
-//            } while(smallest != null);
-        } else {
-            translateAbs(0, -dy);
-            NodeModel prev = computeSmallerUpperBranchNode();
-            if(prev != null) {
-                int correction = (int) (prev.getBottom() - getNodePos().getY());
-                if(correction >= 0) {
-                    prev.translateUpRel(correction);
-                }
-            } else {
-                prevNode().translateUp(dy);
-            }
-        }
-    }
-
-    public void translateUpRel(int dy) {
-        if(isFirst()) {
-            translateUp(dy);
-        } else {
-            translateAbs(0, -dy);
-            prevNode().translateUpRel(dy);
-        }
-    }
-
-    public void translateDownRes(int dy) {
-        if(isLast()) {
-            translateDown(dy);
-        } else {
-            translateAbs(0, dy);
-            nextNode().translateDown(dy);
-        }
-    }
-
-    public void translateDown(int dy) {
-        if(isLast()) {
-            translateAbs(0, dy);
-            NodeModel highest;
-            do {
-                highest = computeHigherLowerBranchNode();
-                if (highest != null) {
-                    int correction = (int) (this.getBottom() - highest.getNodePos().getY());
-                    highest.translateDown(correction);
-                }
-            }while (highest != null);
-        } else {
-            translateAbs(0, dy);
-            int correction = (int) (getBottom() - nextNode().getNodePos().getY());
-            if(correction >= 0) {
-                nextNode().translateDownRes(correction);
-            }
-        }
-
-    }
-
-    public void fix() {
-        translateUp(0);
-        translateDown(0);
-    }
-
-    private NodeModel computeHigherLowerBranchNode() {
-        if(isRootNode()) {
-            return null;
-        }
-
-        NodeModel model = getParent();
-        while (model.getParent() != null && model.nextNode() == null) {
-            model = model.getParent();
-        }
-
-        model = model.nextNode();
-        NodeModel lowest = null;
-        // TODO: has childs redendant
-        while (model != null) {
-
-            if(this.getBottom() > model.getNodePos().getY() ) { // TODO: opt memory - cache pos
-                lowest = model;
-                return lowest;
-            }
-            model = model.firstModel();
-        }
-
-        return null;
-
-    }
 
     public int getBottom() {
         return pos.y + height;

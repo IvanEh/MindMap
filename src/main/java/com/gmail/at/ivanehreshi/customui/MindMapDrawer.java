@@ -190,7 +190,7 @@ public class MindMapDrawer extends JPanel implements MindMapController {
         } else if (model.isRight()) {
             model.getRightNodes().forEach(m -> m.translateAbs(finalDw, 0));
         } else {
-            model.getLeftNodes().forEach(m -> m.translateAbs(-finalDw, 0));
+            model.translateAbs(-finalDw/2, 0);
             model.getRightNodes().forEach(m -> m.translateAbs(finalDw, 0));
         }
 

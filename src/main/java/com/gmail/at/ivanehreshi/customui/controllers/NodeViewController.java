@@ -3,13 +3,10 @@ package com.gmail.at.ivanehreshi.customui.controllers;
 import com.gmail.at.ivanehreshi.customui.NodeView;
 
 import javax.swing.*;
-import javax.swing.event.MouseInputListener;
 import java.awt.*;
-import java.awt.dnd.DragSourceAdapter;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 
 public class NodeViewController extends MouseAdapter{
     Point lastPosition = null;
@@ -33,10 +30,16 @@ public class NodeViewController extends MouseAdapter{
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        NodeView view = getNodeView(e);
+
         if(e.getClickCount() > 1 && SwingUtilities.isLeftMouseButton(e)) {
-            getNodeView(e).insertNode("abcdefgs");
+            view.insertNode("abcdefgs");
         } else {
-            getNodeView(e).setFocused(true);
+            if((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK) {
+                view.setSelected(!view.isSelected(), true);
+            } else {
+                view.setSelected(!view.isSelected(), false);
+            }
         }
     }
 

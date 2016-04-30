@@ -10,7 +10,7 @@ import java.awt.geom.Rectangle2D;
 public class NodeView extends JPanel {
     private MindMapController mindMapController;
     protected NodeModel model;
-    private boolean isFocused = false;
+    private boolean selected = false;
 
     @Deprecated
     public NodeView(boolean dummy) {
@@ -95,7 +95,7 @@ public class NodeView extends JPanel {
         drawTitle(g2d);
 
 
-        if(isFocused()) {
+        if(isSelected()) {
             drawFocused(g2d);
         }
 
@@ -164,16 +164,20 @@ public class NodeView extends JPanel {
         return (int) getLocation().getY() + (int) getSize().getHeight();
     }
 
-    public boolean isFocused() {
-        return isFocused;
+    public boolean isSelected() {
+        return selected;
     }
 
-    public void setFocused(boolean focused) {
-        if(focused) {
-            isFocused = getMindMapController().onNodeGainFocus(this);
+    public void setSelected(boolean selected, boolean add) {
+        if(selected) {
+            this.selected = getMindMapController().onNodeSelect(this, add);
         } else {
-            isFocused = getMindMapController().onNodeLostFocus(this);
+            this.selected = getMindMapController().onNodeUnselect(this, add);
         }
+    }
+
+    public void setSelected(boolean selected) {
+        setSelected(selected, false);
     }
 
     public MindMapController getMindMapController() {

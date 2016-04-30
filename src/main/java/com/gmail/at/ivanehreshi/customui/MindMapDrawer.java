@@ -5,6 +5,8 @@ import com.gmail.at.ivanehreshi.models.NodeModel;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +16,7 @@ public class MindMapDrawer extends JPanel implements MindMapController {
     NodeModel model;
     LineManager lineManager;
     NodeModel.NodeSide side = NodeModel.NodeSide.RIGHT;
-    private NodeView focusedNode;
+    private ArrayList<NodeView> selectedNodes = new ArrayList<>();
 
 
     public MindMapDrawer(NodeModel rootModel) {
@@ -171,23 +173,33 @@ public class MindMapDrawer extends JPanel implements MindMapController {
     }
 
     @Override
-    public NodeView getFocusedNode() {
-        return focusedNode;
+    public ArrayList<NodeView> getSelection() {
+        return selectedNodes;
     }
 
     @Override
-    public boolean onNodeGainFocus(NodeView view) {
-        NodeView f = getFocusedNode();
-        if(f != null) {
-            f.setFocused(false);
+    public boolean onNodeSelect(NodeView view, boolean add) {
+        ArrayList<NodeView> selection = getSelection();
+        if(!add) {
+            onNodeUnselect(null, false);
+            selection.add(view);
+        } else {
+            selection.add(view);
         }
-        focusedNode = view;
-        focusedNode.repaint();
+
         return true;
     }
 
     @Override
-    public boolean onNodeLostFocus(NodeView view) {
+    public boolean onNodeUnselect(NodeView view, boolean add) {
+        if(!add) {
+            ArrayList<NodeView> copy = new ArrayList<>(getSelection());
+            getSelection().clear();
+            copy.forEach(v -> v.setSelected(false, true));
+        } else {
+            getSelection().remove(view);
+        }
+
         return false;
     }
 }

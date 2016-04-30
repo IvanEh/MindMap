@@ -52,7 +52,6 @@ public class MindMapDrawer extends JPanel implements MindMapController {
         model.addChangeListener(this);
         modelToViewMap.put(model, view);
         add(view);
-        view.setVisible(true);
         return view;
     }
 
@@ -106,23 +105,6 @@ public class MindMapDrawer extends JPanel implements MindMapController {
     }
 
 
-
-    private void alignIfInterfereWithLowerBranch(NodeView view, Integer dx, Integer dy, boolean validate) {
-
-    }
-
-    private void alignIfInterfereWithNeighbor(NodeView view, Integer dx, Integer dy, boolean validate) {
-        NodeModel model = view.getModel();
-        int anotherDy = (int) model.getNodePos().getY();
-        if(anotherDy < 0) {
-            model.translateRel(0, (int) - anotherDy);
-
-            NodeView prevView = getNodeViewByModel(model.prevNode());
-            prevView.translate(0, (int) anotherDy);
-            layoutNode(view);
-        }
-    }
-
     protected Map<NodeModel, NodeView> getModelToViewMap() {
         return modelToViewMap;
     }
@@ -159,7 +141,7 @@ public class MindMapDrawer extends JPanel implements MindMapController {
             retView.getModel().setNodePos(anchor);
         }
 
-
+        view.revalidate();
         return retView;
     }
 }

@@ -32,4 +32,6 @@ public interface MindMapController extends ChangeListener {
      * @return true if the node can be focused, false - otherwise
      */
     boolean onNodeUnselect(NodeView view, boolean add);
+
+    void onMindMapTranslate(int dx, int dy);
 }

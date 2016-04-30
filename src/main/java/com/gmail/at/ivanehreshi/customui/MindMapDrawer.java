@@ -1,5 +1,6 @@
 package com.gmail.at.ivanehreshi.customui;
 
+import com.gmail.at.ivanehreshi.customui.controllers.MindMapMoveController;
 import com.gmail.at.ivanehreshi.models.NodeModel;
 
 import javax.swing.*;
@@ -29,6 +30,14 @@ public class MindMapDrawer extends JPanel implements MindMapController {
         createGui();
         createDebugGui();
         createModelProjection();
+        setUpControllers();
+    }
+
+    private void setUpControllers() {
+        MindMapMoveController moveController = new MindMapMoveController(this);
+
+        addMouseMotionListener(moveController);
+        addMouseListener(moveController);
     }
 
     private void createDebugGui() {
@@ -201,5 +210,11 @@ public class MindMapDrawer extends JPanel implements MindMapController {
         }
 
         return false;
+    }
+
+    @Override
+    public void onMindMapTranslate(int dx, int dy) {
+        getMindMapLayout().translate(dx, dy);
+        doLayout();
     }
 }

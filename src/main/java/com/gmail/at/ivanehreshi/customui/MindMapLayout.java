@@ -3,6 +3,8 @@ package com.gmail.at.ivanehreshi.customui;
 import java.awt.*;
 
 public class MindMapLayout implements LayoutManager {
+    private int renderX = 0;
+    private int renderY = 0;
 
     @Override
     public void addLayoutComponent(String name, Component comp) {
@@ -45,9 +47,14 @@ public class MindMapLayout implements LayoutManager {
         }
     }
 
+    public void translate(int dx, int dy) {
+        renderX += dx;
+        renderY += dy;
+    }
+
     Point getOrigin(Container parent) {
-        int x = parent.getWidth() / 2;
-        int y = parent.getHeight() / 2;
+        int x = parent.getWidth() / 2 + renderX;
+        int y = parent.getHeight() / 2 + renderY;
         return new Point(x, y);
     }
 }

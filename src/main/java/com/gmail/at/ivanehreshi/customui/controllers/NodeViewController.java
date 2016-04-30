@@ -28,11 +28,12 @@ public class NodeViewController extends MouseAdapter{
         getNodeView(e).translate(dx, dy);
     }
 
+    // TODO: only right button
     @Override
     public void mouseClicked(MouseEvent e) {
         NodeView view = getNodeView(e);
 
-        if(e.getClickCount() > 1 && SwingUtilities.isLeftMouseButton(e)) {
+        if(e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
             view.insertNode("abcdefgs");
         } else {
             if((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK) {

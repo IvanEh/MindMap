@@ -58,7 +58,7 @@ public class NodeView extends JPanel {
 
     @Deprecated
     public NodeView insertNode(String s) {
-        return insertNode(new NodeModel(s, getModel(), NodeModel.NodeSide.RIGHT));
+        return insertNode(new NodeModel(s, getModel(), NodeModel.NodeSide.ROOT));
     }
 
     @Override

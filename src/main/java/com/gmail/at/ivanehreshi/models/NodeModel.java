@@ -277,6 +277,7 @@ public class NodeModel implements Iterable<NodeModel>{
     public void addNode(NodeModel model, NodeSide side) {
         getNodes(side).add(model);
         model.parentNode = this;
+        model.setNodeSide(side);
     }
 
     // TODO: fix typo
@@ -545,6 +546,18 @@ public class NodeModel implements Iterable<NodeModel>{
         return new ConcatIter<NodeModel>(iterator(NodeSide.RIGHT), iterator(NodeSide.LEFT));
     }
 
+    public void addNode(NodeModel model) {
+        addNode(model, this.getNodeSide());
+    }
+
+    public boolean isLeft() {
+        return getNodeSide() == NodeSide.LEFT;
+    }
+
+    public boolean isRight() {
+        return getNodeSide() == NodeSide.RIGHT;
+    }
+
     public static class NodeModelChangeEvent extends ChangeEvent {
         private final Cause cause;
         private final Object data;
@@ -608,6 +621,7 @@ public class NodeModel implements Iterable<NodeModel>{
 
     public enum NodeSide {
         LEFT,
-        RIGHT
+        RIGHT,
+        ROOT
     }
 }

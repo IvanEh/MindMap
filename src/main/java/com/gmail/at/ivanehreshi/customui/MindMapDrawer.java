@@ -60,6 +60,17 @@ public class MindMapDrawer extends JPanel implements MindMapController {
 
     }
 
+    protected void nextSide() {
+        switch (side) {
+            case LEFT:
+                side = NodeModel.NodeSide.RIGHT;
+                break;
+            case RIGHT:
+                side = NodeModel.NodeSide.LEFT;
+                break;
+        }
+    }
+
     @Override
     public void stateChanged(ChangeEvent e) {
 
@@ -119,11 +130,18 @@ public class MindMapDrawer extends JPanel implements MindMapController {
     @Override
     public NodeView onNodeModelInsert(NodeView view, NodeModel model) {
         Point anchor;
-        boolean hasChildren = view.getModel().hasChildren(side);
-        NodeView retView = this.manageSingleModel(model);
 
-        view.getModel().addNode(model, side);
-        if(hasChildren) {
+        if(view.getModel().isRootNode()) {
+            view.getModel().addNode(model, side);
+            nextSide();
+        }else {
+            view.getModel().addNode(model);
+        }
+
+        NodeView retView = this.manageSingleModel(model);
+        NodeModel.NodeSide side = model.getNodeSide();
+
+        if(model.neighborsCnt() > 1) {
             NodeModel lastModel = view.getModel().lastModel(side).prevNode();
             NodeModel lowestModel = lastModel.findLowest(side);
 
@@ -134,10 +152,15 @@ public class MindMapDrawer extends JPanel implements MindMapController {
             int correction = (model.getBottom() - lastModel.getY() - view.getModel().getHeight())/2;
             view.getModel().firstModel(side).translateRelWithAlignment(0, -correction);
         } else {
-
             anchor = new Point(view.getModel().getNodePos());
-            anchor.translate(view.getModel().getProps().getRecommendedLinkLength(), 0);
-            anchor.translate(view.getWidth(), 0);
+
+            if(model.getNodeSide() == NodeModel.NodeSide.LEFT) {
+                anchor.translate(-view.getModel().getProps().getRecommendedLinkLength(), 0);
+                anchor.translate(-model.getWidth(), 0);
+            } else {
+                anchor.translate(view.getModel().getProps().getRecommendedLinkLength(), 0);
+                anchor.translate(view.getWidth(), 0);
+            }
 
             retView.getModel().setNodePos(anchor);
         }

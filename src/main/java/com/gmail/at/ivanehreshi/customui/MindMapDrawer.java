@@ -197,6 +197,15 @@ public class MindMapDrawer extends JPanel implements MindMapController {
         doLayout();
     }
 
+    @Override
+    public void onViewRemove(NodeView view) {
+        NodeModel model = view.getModel();
+        model.removeFromParent();
+        for(NodeModel m: model) {
+            this.remove(getModelToViewMap().remove(m));
+        }
+    }
+
     private NodeView createLaidOutView(NodeView parent, NodeModel model) {
         Point anchor;
 

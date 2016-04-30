@@ -32,6 +32,27 @@ public class NodeViewPopupBuilder {
         return addNode;
     }
 
+    JMenuItem buildRemoveNode() {
+        JMenuItem menu = new JMenuItem(new YAction(Strings.Popup.REMOVE_NODE) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                NodeView view = unwrapView(e);
+                view.remove();
+            }
+        });
+
+        popup.add(menu);
+
+        return menu;
+    }
+
+    NodeView unwrapView(ActionEvent e) {
+        JMenuItem source = (JMenuItem) e.getSource();
+        JPopupMenu popup = (JPopupMenu) source.getParent();
+        NodeView view = (NodeView) popup.getInvoker();
+        return view;
+    }
+
     JPopupMenu getPopup() {
         return popup;
     }
@@ -41,6 +62,7 @@ public class NodeViewPopupBuilder {
             NodeViewPopupBuilder builder = new NodeViewPopupBuilder();
             builder.buildPopup();
             builder.buildAddNode();
+            builder.buildRemoveNode();
             return builder.getPopup();
         }
     }

@@ -563,6 +563,11 @@ public class NodeModel implements Iterable<NodeModel>{
         return getNodeSide() == NodeSide.RIGHT;
     }
 
+    public void removeFromParent() {
+        NodeModel p = getParent();
+        if(p != null)
+            p.getNodes(this.getNodeSide()).remove(this);
+    }
 
 
     public static class ChangeEvent extends javax.swing.event.ChangeEvent {

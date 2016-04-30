@@ -208,6 +208,13 @@ public class NodeView extends JPanel {
         return (int) getLocation().getY() + (int) getSize().getHeight();
     }
 
+    public void remove() {
+        setVisible(false);
+        if(nodeViewController != null) {
+            mindMapController.onViewRemove(this);
+        }
+    }
+
     public boolean isSelected() {
         return selected;
     }

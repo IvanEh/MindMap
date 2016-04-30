@@ -41,4 +41,6 @@ public interface MindMapController extends ChangeListener {
     void onModelChangeContent(NodeModel.ChangeEvent ch);
 
     void onModelChangeTitle(NodeModel.ChangeEvent ch);
+
+    void onViewRemove(NodeView view);
 }

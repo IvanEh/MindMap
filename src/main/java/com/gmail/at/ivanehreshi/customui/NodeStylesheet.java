@@ -12,6 +12,7 @@ public class NodeStylesheet extends Stylesheet{
     public static final String FONT_NAME = "FONT_NAME";
     public static final String MINIMUM_HEIGHT = "MINIMUM_HEIGHT";
     public static final String MINIMUM_WIDTH = "MINIMUM_WIDTH";
+    public static final String FOCUSED_MARKER_COLOR = "FOCUSED_MARKER_COLOR";
 
     {
         put(NODE_COLOR, new Color(84, 51, 116));
@@ -24,6 +25,7 @@ public class NodeStylesheet extends Stylesheet{
         put(FONT_NAME, "Ubuntu");
         put(MINIMUM_HEIGHT, 25);
         put(MINIMUM_WIDTH, 50);
+        put(FOCUSED_MARKER_COLOR, new Color(4, 111, 12));
     }
 
     public Color getNodeColor() {
@@ -64,5 +66,9 @@ public class NodeStylesheet extends Stylesheet{
 
     public int getMinimumWidth() {
         return (int) get(MINIMUM_WIDTH);
+    }
+
+    public Color getFocusedMarkerColor() {
+        return (Color) get(FOCUSED_MARKER_COLOR);
     }
 }

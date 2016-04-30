@@ -14,6 +14,7 @@ public class MindMapDrawer extends JPanel implements MindMapController {
     NodeModel model;
     LineManager lineManager;
     NodeModel.NodeSide side = NodeModel.NodeSide.RIGHT;
+    private NodeView focusedNode;
 
 
     public MindMapDrawer(NodeModel rootModel) {
@@ -167,5 +168,26 @@ public class MindMapDrawer extends JPanel implements MindMapController {
 
         view.revalidate();
         return retView;
+    }
+
+    @Override
+    public NodeView getFocusedNode() {
+        return focusedNode;
+    }
+
+    @Override
+    public boolean onNodeGainFocus(NodeView view) {
+        NodeView f = getFocusedNode();
+        if(f != null) {
+            f.setFocused(false);
+        }
+        focusedNode = view;
+        focusedNode.repaint();
+        return true;
+    }
+
+    @Override
+    public boolean onNodeLostFocus(NodeView view) {
+        return false;
     }
 }

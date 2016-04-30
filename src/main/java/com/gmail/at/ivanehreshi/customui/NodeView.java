@@ -10,11 +10,11 @@ import java.awt.geom.Rectangle2D;
 public class NodeView extends JPanel {
     private MindMapController mindMapController;
     protected NodeModel model;
+    private boolean isFocused = false;
 
     @Deprecated
     public NodeView(boolean dummy) {
         model = new NodeModel("Root", NodeModel.NodeSide.RIGHT);
-
     }
 
     private NodeView() {
@@ -87,12 +87,36 @@ public class NodeView extends JPanel {
         int outerBorder = getModel().getProps().getOuterMargin();
 
         g2d.setColor(getModel().getProps().getNodeColor());
+
         g2d.setStroke(new BasicStroke(nodeThickness));
         g2d.drawRoundRect(outerBorder + nodeThickness/2, outerBorder + nodeThickness/2,
                 this.getWidth()-2*outerBorder - nodeThickness, this.getHeight()-2*outerBorder - nodeThickness, 10, 10);
 
-
         drawTitle(g2d);
+
+
+        if(isFocused()) {
+            drawFocused(g2d);
+        }
+
+    }
+
+    private void drawFocused(Graphics2D g2d) {
+        final double length = 0.2;
+        final int width = (int) (getWidth()*length);
+        final int height = (int) (getHeight()*length);
+        final int dx = (getWidth() - width)/2;
+        final int dy = (getHeight() - height)/2;
+        final int thickness = 4;
+
+        g2d.setColor(getModel().getProps().getFocusedMarkerColor());
+        g2d.setStroke(new BasicStroke(thickness));
+
+        g2d.drawLine(thickness/2, dy, thickness/2, height + dy);
+        g2d.drawLine(getWidth()-thickness/2, dy, getWidth()-thickness/2, height + dy);
+
+        g2d.drawLine(dx, thickness/2, width + dx, thickness/2);
+        g2d.drawLine(dx, getHeight()-thickness/2, width + dx, getHeight() - thickness/2);
     }
 
     private void drawTitle(Graphics2D g2d) {
@@ -140,7 +164,25 @@ public class NodeView extends JPanel {
         return (int) getLocation().getY() + (int) getSize().getHeight();
     }
 
+    public boolean isFocused() {
+        return isFocused;
+    }
 
+    public void setFocused(boolean focused) {
+        if(focused) {
+            isFocused = getMindMapController().onNodeGainFocus(this);
+        } else {
+            isFocused = getMindMapController().onNodeLostFocus(this);
+        }
+    }
+
+    public MindMapController getMindMapController() {
+        return mindMapController;
+    }
+
+    public void setMindMapController(MindMapController mindMapController) {
+        this.mindMapController = mindMapController;
+    }
 
     @Override
     public String toString() {

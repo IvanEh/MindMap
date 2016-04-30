@@ -35,6 +35,8 @@ public class NodeViewController extends MouseAdapter{
     public void mouseClicked(MouseEvent e) {
         if(e.getClickCount() > 1 && SwingUtilities.isLeftMouseButton(e)) {
             getNodeView(e).insertNode("abcdefgs");
+        } else {
+            getNodeView(e).setFocused(true);
         }
     }
 

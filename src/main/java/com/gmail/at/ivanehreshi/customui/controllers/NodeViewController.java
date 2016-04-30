@@ -42,6 +42,9 @@ public class NodeViewController extends MouseAdapter{
                 view.setSelected(!view.isSelected(), false);
             }
         }
+        if(SwingUtilities.isRightMouseButton(e)) {
+            view.getMindMapController().onModelViewContextMenu(view, e.getX(), e.getY());
+        }
     }
 
     @Override

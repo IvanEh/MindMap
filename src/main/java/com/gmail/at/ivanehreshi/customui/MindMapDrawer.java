@@ -1,6 +1,8 @@
 package com.gmail.at.ivanehreshi.customui;
 
 import com.gmail.at.ivanehreshi.customui.controllers.MindMapMoveController;
+import com.gmail.at.ivanehreshi.menu.NodeViewPopupBuilder;
+import com.gmail.at.ivanehreshi.menu.NodeViewPopupBuilder.Director;
 import com.gmail.at.ivanehreshi.models.NodeModel;
 
 import javax.swing.*;
@@ -17,6 +19,7 @@ public class MindMapDrawer extends JPanel implements MindMapController {
     NodeModel model;
     LineManager lineManager;
     NodeModel.NodeSide side = NodeModel.NodeSide.RIGHT;
+    private JPopupMenu nodePopup = new NodeViewPopupBuilder.Director().build();
     private ArrayList<NodeView> selectedNodes = new ArrayList<>();
 
 
@@ -216,5 +219,10 @@ public class MindMapDrawer extends JPanel implements MindMapController {
     public void onMindMapTranslate(int dx, int dy) {
         getMindMapLayout().translate(dx, dy);
         doLayout();
+    }
+
+    @Override
+    public void onModelViewContextMenu(NodeView view, int x, int y) {
+        nodePopup.show(view, x, y);
     }
 }

@@ -34,4 +34,6 @@ public interface MindMapController extends ChangeListener {
     boolean onNodeUnselect(NodeView view, boolean add);
 
     void onMindMapTranslate(int dx, int dy);
+
+    void onModelViewContextMenu(NodeView view, int x, int y);
 }

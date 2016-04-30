@@ -37,4 +37,9 @@ public class NodeViewController extends MouseAdapter{
             getNodeView(e).insertNode("abcdefgs");
         }
     }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        lastPosition = null;
+    }
 }

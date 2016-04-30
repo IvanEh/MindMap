@@ -56,7 +56,7 @@ public class MindMapDrawer extends JPanel implements MindMapController {
 
     private void createModelProjection() {
         for(NodeModel model: this.model) {
-            manageSingleModel(model);
+            onNodeModelInsert(null, model);
         }
     }
 
@@ -144,7 +144,14 @@ public class MindMapDrawer extends JPanel implements MindMapController {
      */
     @Override
     public NodeView onNodeModelInsert(NodeView view, NodeModel model) {
-        NodeView retView = createLaidOutView(view, model);
+        NodeView retView = null;
+        if(view == null) {
+            if(model.isRootNode()) {
+                retView =  manageSingleModel(model);
+            }
+        } else {
+            retView = createLaidOutView(view, model);
+        }
 
         model.addChangeListener((e -> {
             NodeModel.ChangeEvent ch = (NodeModel.ChangeEvent) e;

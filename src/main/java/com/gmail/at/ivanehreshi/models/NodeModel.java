@@ -544,10 +544,11 @@ public class NodeModel implements Iterable<NodeModel>{
         return cachedFont;
     }
 
-    @Deprecated
     @Override
     public Iterator<NodeModel> iterator() {
-        return new ConcatIter<NodeModel>(iterator(NodeSide.RIGHT), iterator(NodeSide.LEFT));
+        Iterator<NodeModel> it = new ConcatIter<NodeModel>(iterator(NodeSide.RIGHT), iterator(NodeSide.LEFT));
+        it.next();
+        return it;
     }
 
     public void addNode(NodeModel model) {

@@ -1,5 +1,6 @@
-package com.gmail.at.ivanehreshi.customui;
+package com.gmail.at.ivanehreshi.customui.controllers;
 
+import com.gmail.at.ivanehreshi.customui.NodeView;
 import com.gmail.at.ivanehreshi.models.NodeModel;
 
 import javax.swing.event.ChangeListener;

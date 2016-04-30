@@ -1,7 +1,5 @@
 package com.gmail.at.ivanehreshi.customui.controllers;
 
-import com.gmail.at.ivanehreshi.customui.MindMapController;
-
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -24,6 +22,7 @@ public class MindMapMoveController extends MouseAdapter{
         if(lastPosition == null) {
             lastPosition = e.getPoint();
         }
+
 
         int dx = e.getX() - lastPosition.x;
         int dy = e.getY() - lastPosition.y;

@@ -1,7 +1,7 @@
 package com.gmail.at.ivanehreshi.customui;
 
+import com.gmail.at.ivanehreshi.customui.controllers.MindMapController;
 import com.gmail.at.ivanehreshi.customui.controllers.NodeViewController;
-import com.gmail.at.ivanehreshi.menu.NodeViewPopupBuilder;
 import com.gmail.at.ivanehreshi.models.NodeModel;
 
 import javax.swing.*;

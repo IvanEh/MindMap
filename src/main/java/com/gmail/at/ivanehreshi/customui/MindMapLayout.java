@@ -1,5 +1,7 @@
 package com.gmail.at.ivanehreshi.customui;
 
+import com.gmail.at.ivanehreshi.customui.controllers.MindMapController;
+
 import java.awt.*;
 
 public class MindMapLayout implements LayoutManager {

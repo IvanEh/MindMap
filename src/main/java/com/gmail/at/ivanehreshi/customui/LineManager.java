@@ -26,7 +26,6 @@ public class LineManager {
         g2d.drawLine(start.x, start.y, end.x, end.y);
     }
 
-
     public void drawLines(Graphics2D g2d) {
         Point origin = mindMapLayout.getOrigin(mindMapDrawer);
 

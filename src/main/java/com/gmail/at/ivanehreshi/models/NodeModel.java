@@ -4,7 +4,6 @@ import com.gmail.at.ivanehreshi.customui.NodeStylesheet;
 import com.gmail.at.ivanehreshi.utils.ConcatIter;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
@@ -44,7 +43,7 @@ public class NodeModel implements Iterable<NodeModel>{
         updateModelPreferredSize();
     }
 
-    private void updateModelPreferredSize() {
+    public void updateModelPreferredSize() {
         AffineTransform affinetransform = getCachedFont().getTransform();
         FontRenderContext frc = new FontRenderContext(affinetransform,true,true);
         int textwidth = (int)(getCachedFont().getStringBounds(title, frc).getWidth());
@@ -346,6 +345,7 @@ public class NodeModel implements Iterable<NodeModel>{
 
     public void setTitle(String title) {
         this.title = title;
+        fireChangeEvent(new ChangeEvent(this, ChangeEvent.Cause.TITLE, null));
     }
 
     public String getContent() {
@@ -365,7 +365,7 @@ public class NodeModel implements Iterable<NodeModel>{
     }
 
     protected void fireChangeEvent() {
-        ChangeEvent event = new ChangeEvent(this);
+        javax.swing.event.ChangeEvent event = new javax.swing.event.ChangeEvent(this);
         fireChangeEvent(event);
     }
 
@@ -383,12 +383,16 @@ public class NodeModel implements Iterable<NodeModel>{
         return new Point((int) pos.x, (int) pos.y);
     }
 
-    protected void fireChangeEvent(ChangeEvent event) {
+    protected void fireChangeEvent(javax.swing.event.ChangeEvent event) {
         changeListeners.forEach((listener) -> listener.stateChanged(event) );
     }
 
-    public Point getNodePos() {
+    public Point getMutNodePos() {
         return pos;
+    }
+
+    public Point getNodePos() {
+        return new Point(pos);
     }
 
     public void setNodePos(Point nodePos) {
@@ -456,7 +460,7 @@ public class NodeModel implements Iterable<NodeModel>{
         // TODO: has childs redendant
         while (model != null) {
 
-            if(model.getBottom() > this.getNodePos().getY()) { // TODO: opt memory - cache pos
+            if(model.getBottom() > this.getMutNodePos().getY()) { // TODO: opt memory - cache pos
                 lowest = model;
                 return lowest;
             }
@@ -558,14 +562,16 @@ public class NodeModel implements Iterable<NodeModel>{
         return getNodeSide() == NodeSide.RIGHT;
     }
 
-    public static class NodeModelChangeEvent extends ChangeEvent {
+
+
+    public static class ChangeEvent extends javax.swing.event.ChangeEvent {
         private final Cause cause;
         private final Object data;
 
         public enum Cause {
-            TEXT,
+            TITLE,
             CONTENT,
-            SIZE
+            BOUNDS
         }
         /**
          * Constructs a ChangeEvent object.
@@ -573,7 +579,7 @@ public class NodeModel implements Iterable<NodeModel>{
          * @param source the Object that is the source of the event
          *               (typically <code>this</code>)
          */
-        public NodeModelChangeEvent(Object source, Cause cause, Object data) {
+        public ChangeEvent(Object source, Cause cause, Object data) {
             super(source);
             this.cause = cause;
             this.data = data;
@@ -585,6 +591,11 @@ public class NodeModel implements Iterable<NodeModel>{
 
         public Object getData() {
             return data;
+        }
+
+        @Override
+        public NodeModel getSource() {
+            return (NodeModel) super.getSource();
         }
     }
 

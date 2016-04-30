@@ -37,4 +37,8 @@ public interface MindMapController extends ChangeListener {
     void onMindMapTranslate(int dx, int dy);
 
     void onModelViewContextMenu(NodeView view, int x, int y);
+
+    void onModelChangeContent(NodeModel.ChangeEvent ch);
+
+    void onModelChangeTitle(NodeModel.ChangeEvent ch);
 }

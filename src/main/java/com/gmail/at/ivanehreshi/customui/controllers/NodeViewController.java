@@ -40,6 +40,7 @@ public class NodeViewController extends MouseAdapter{
                 view.setSelected(!view.isSelected(), true);
             } else {
                 view.setSelected(!view.isSelected(), false);
+                view.edit();
             }
         }
         if(SwingUtilities.isRightMouseButton(e)) {
@@ -50,5 +51,13 @@ public class NodeViewController extends MouseAdapter{
     @Override
     public void mouseReleased(MouseEvent e) {
         lastPosition = null;
+    }
+
+    public void onEditAction(ActionEvent e) {
+        JTextField field = (JTextField) e.getSource();
+        NodeView view = (NodeView) field.getParent();
+
+        view.finishEditing();
+        view.getModel().setTitle(field.getText());
     }
 }

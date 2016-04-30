@@ -6,12 +6,17 @@ import com.gmail.at.ivanehreshi.models.NodeModel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 
 public class NodeView extends JPanel {
     private MindMapController mindMapController;
     protected NodeModel model;
     private boolean selected = false;
+    private JTextField editor;
+    private State state;
+    private NodeViewController nodeViewController;
 
     @Deprecated
     public NodeView(boolean dummy) {
@@ -19,14 +24,35 @@ public class NodeView extends JPanel {
     }
 
     private NodeView() {
+        state = State.STATIC;
+
         setOpaque(false);
+
+        initGui();
+
         setUpControllers();
     }
 
+    private void initGui() {
+        editor = new JTextField();
+        add(editor);
+        editor.setVisible(false);
+        editor.setBorder(null);
+        editor.setOpaque(true);
+        editor.setBackground(new Color(215, 223, 223, 150));
+    }
+
     protected void setUpControllers() {
-        NodeViewController nodeViewController = new NodeViewController();
+        nodeViewController = new NodeViewController();
         addMouseListener(nodeViewController);
         addMouseMotionListener(nodeViewController);
+
+        editor.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                nodeViewController.onEditAction(e);
+            }
+        });
     }
 
     public NodeView(NodeModel model, MindMapController mindMapController) {
@@ -55,6 +81,23 @@ public class NodeView extends JPanel {
         }
 
         return this;
+    }
+
+    public void edit() {
+        editor.setVisible(true);
+        editor.setText(getModel().getTitle());
+        Rectangle2D textArea = getTextArea();
+
+        editor.setBounds((int) textArea.getX(), (int)textArea.getY(),
+                (int)textArea.getWidth(), (int)textArea.getHeight());
+        this.state = State.EDIT;
+    }
+
+    public void finishEditing() {
+        if(state == State.EDIT) {
+            state = State.STATIC;
+            editor.setVisible(false);
+        }
     }
 
     @Deprecated
@@ -121,10 +164,10 @@ public class NodeView extends JPanel {
     }
 
     private void drawTitle(Graphics2D g2d) {
-        Point textPosition = getAlignedTextPos(g2d);
-//        g2d.setStroke(new BasicStroke(1));
-//        g2d.drawRoundRect(textPosition.x, textPosition.y, 10, 10, 10, 10);
-        g2d.drawString(this.model.getTitle(), textPosition.x, textPosition.y);
+        if(state == State.STATIC) {
+            Point textPosition = getAlignedTextPos(g2d);
+            g2d.drawString(this.model.getTitle(), textPosition.x, textPosition.y);
+        }
     }
 
     private Point getAlignedTextPos(Graphics2D g2d) {
@@ -194,4 +237,8 @@ public class NodeView extends JPanel {
         return "view( " + getModel() + ") at + getLocation()" ;
     }
 
+    enum State {
+        EDIT,
+        STATIC
+    }
 }

@@ -40,6 +40,7 @@ public class MindMapDrawer extends JPanel implements MindMapController {
 
         addMouseMotionListener(moveController);
         addMouseListener(moveController);
+
     }
 
     private void createDebugGui() {
@@ -143,43 +144,90 @@ public class MindMapDrawer extends JPanel implements MindMapController {
      */
     @Override
     public NodeView onNodeModelInsert(NodeView view, NodeModel model) {
+        NodeView retView = createLaidOutView(view, model);
+
+        model.addChangeListener((e -> {
+            NodeModel.ChangeEvent ch = (NodeModel.ChangeEvent) e;
+            switch (ch.getCause()) {
+                case TITLE:
+                    onModelChangeTitle(ch);
+                    break;
+                case CONTENT:
+                    onModelChangeContent(ch);
+                    break;
+            }
+        }));
+
+        return retView;
+    }
+
+    public void onModelChangeContent(NodeModel.ChangeEvent ch) {
+    }
+
+    public void onModelChangeTitle(NodeModel.ChangeEvent ch) {
+        NodeModel model = ch.getSource();
+        int oldWidth = model.getWidth();
+        int oldHeight = model.getHeight();
+
+        // TODO: move to onModelChangeSize
+        model.updateModelPreferredSize();
+        int dw = (int) (model.getWidth() - oldWidth);
+        int dh = (int) (model.getHeight() - oldHeight);
+
+        if(dw < 0)
+            dw*= 0;
+
+        final int finalDw = dw;
+        if(model.isLeft()) {
+            model.translateAbs(-dw, 0); // TODO: need fix0?
+        } else if (model.isRight()) {
+            model.getRightNodes().forEach(m -> m.translateAbs(finalDw, 0));
+        } else {
+            model.getLeftNodes().forEach(m -> m.translateAbs(-finalDw, 0));
+            model.getRightNodes().forEach(m -> m.translateAbs(finalDw, 0));
+        }
+
+        doLayout();
+    }
+
+    private NodeView createLaidOutView(NodeView parent, NodeModel model) {
         Point anchor;
 
-        if(view.getModel().isRootNode()) {
-            view.getModel().addNode(model, side);
+        if(parent.getModel().isRootNode()) {
+            parent.getModel().addNode(model, side);
             nextSide();
         }else {
-            view.getModel().addNode(model);
+            parent.getModel().addNode(model);
         }
 
         NodeView retView = this.manageSingleModel(model);
         NodeModel.NodeSide side = model.getNodeSide();
 
         if(model.neighborsCnt() > 1) {
-            NodeModel lastModel = view.getModel().lastModel(side).prevNode();
+            NodeModel lastModel = parent.getModel().lastModel(side).prevNode();
             NodeModel lowestModel = lastModel.findLowest(side);
 
-            model.setNodePos(new Point(lastModel.getNodePos()));
-            retView.translate(0, lowestModel.getBottom() - model.getY() + view.getModel().getProps().getMinimumGap());
+            model.setNodePos(new Point(lastModel.getMutNodePos()));
+            retView.translate(0, lowestModel.getBottom() - model.getY() + parent.getModel().getProps().getMinimumGap());
             model.fixDown(side);
 
-            int correction = (model.getBottom() - lastModel.getY() - view.getModel().getHeight())/2;
-            view.getModel().firstModel(side).translateRelWithAlignment(0, -correction);
+            int correction = (model.getBottom() - lastModel.getY() - parent.getModel().getHeight())/2;
+            parent.getModel().firstModel(side).translateRelWithAlignment(0, -correction);
         } else {
-            anchor = new Point(view.getModel().getNodePos());
+            anchor = new Point(parent.getModel().getMutNodePos());
 
             if(model.getNodeSide() == NodeModel.NodeSide.LEFT) {
-                anchor.translate(-view.getModel().getProps().getRecommendedLinkLength(), 0);
+                anchor.translate(-parent.getModel().getProps().getRecommendedLinkLength(), 0);
                 anchor.translate(-model.getWidth(), 0);
             } else {
-                anchor.translate(view.getModel().getProps().getRecommendedLinkLength(), 0);
-                anchor.translate(view.getWidth(), 0);
+                anchor.translate(parent.getModel().getProps().getRecommendedLinkLength(), 0);
+                anchor.translate(parent.getWidth(), 0);
             }
 
             retView.getModel().setNodePos(anchor);
         }
 
-        view.revalidate();
+        parent.revalidate();
         return retView;
     }
 

@@ -41,7 +41,7 @@ public class MindMapLayout implements LayoutManager {
         if (comp instanceof NodeView) {
             NodeView nodeView = (NodeView) comp;
 
-            Point nodePos = nodeView.getModel().getNodePos();
+            Point nodePos = nodeView.getModel().getMutNodePos();
             int x = (int) (origin.getX() + nodePos.getX() );
             int y = (int) (origin.getY() +  nodePos.getY()) ;
             nodeView.setLocation(x, y);

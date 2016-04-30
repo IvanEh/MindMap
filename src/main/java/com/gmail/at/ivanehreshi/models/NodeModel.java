@@ -1,6 +1,7 @@
 package com.gmail.at.ivanehreshi.models;
 
 import com.gmail.at.ivanehreshi.customui.NodeStylesheet;
+import com.gmail.at.ivanehreshi.utils.ConcatIter;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.event.ChangeEvent;
@@ -16,7 +17,11 @@ import java.util.Stack;
 public class NodeModel implements Iterable<NodeModel>{
     private String title;
     private String content;
-    private ArrayList<NodeModel> nodes;
+
+    @Deprecated
+    private ArrayList<NodeModel> leftNodes;
+    private ArrayList<NodeModel> rightNodes;
+    private NodeSide nodeSide;
     private ArrayList<ChangeListener> changeListeners;
     private NodeModel parentNode;
     private NodeStylesheet props;
@@ -25,10 +30,12 @@ public class NodeModel implements Iterable<NodeModel>{
     private int width = 50;
     private Font cachedFont;
 
-    public NodeModel(String title) {
+    public NodeModel(String title, NodeSide side) {
         this.title = title;
         this.content = "";
-        nodes = new ArrayList<>();
+        leftNodes = new ArrayList<>();
+        rightNodes = new ArrayList<>();
+        nodeSide = side;
         changeListeners = new ArrayList<>();
         pos = new Point();
         props = new NodeStylesheet();
@@ -53,29 +60,29 @@ public class NodeModel implements Iterable<NodeModel>{
         return cachedFont;
     }
 
-    public NodeModel(String title, NodeModel parentNode) {
-        this(title);
+    public NodeModel(String title, NodeModel parentNode, NodeSide side) {
+        this(title, side);
         this.parentNode = parentNode;
     }
 
-    public NodeModel lastModel() {
-        if(nodes.size() == 0)
+    public NodeModel lastModel(NodeSide side) {
+        if(getNodes(side).size() == 0)
             return null;
 
-        return nodes.get(nodes.size() - 1);
+        return getNodes(side).get(getNodes(side).size() - 1);
     }
 
-    public NodeModel firstModel() {
-        if(nodes.size() == 0)
+    public NodeModel firstModel(NodeSide side) {
+        if(getNodes(side).size() == 0)
             return null;
 
-        return nodes.get(0);
+        return getNodes(side).get(0);
     }
 
     public NodeModel translateRel(int dx, int dy) {
         this.translateAbs(dx, dy);
         if(!isLast()) {
-            parentNode.nodes.subList(index() + 1, neighborsCnt())
+            neighbors().subList(index() + 1, neighborsCnt())
                       .forEach(node -> node.translateAbs(0, dy));
         }
 
@@ -83,32 +90,44 @@ public class NodeModel implements Iterable<NodeModel>{
     }
 
     public int neighborsCnt() {
-        return parentNode.getNodes().size();
+        return neighbors().size();
+    }
+
+    public ArrayList<NodeModel> neighbors() {
+        if(isRootNode())
+            return null;
+
+        return getParent().getNodes(getNodeSide());
     }
 
     public NodeModel translateAbs(int dx, int dy) {
         pos.translate(dx, dy);
-        nodes.forEach(node -> node.translateAbs(dx, dy));
+        getLeftNodes().forEach(node -> node.translateAbs(dx, dy));
+        getRightNodes().forEach(node -> node.translateAbs(dx, dy));
 
         return this;
     }
 
+    // TODO: Review implementation
+    @Deprecated
     public NodeModel translateAbsWithAlignment(int dx, int dy) {
         this.translateAbs(dx, dy);
         if(dy < 0) {
-            this.fixUp();
+            this.fixUp(getNodeSide());
         } else {
-            this.fixDown();
+            this.fixDown(getNodeSide());
         }
         return this;
     }
 
+    // TODO: Review implementation
+    @Deprecated
     public NodeModel translateRelWithAlignment(int dx, int dy) {
         this.translateRel(dx, dy);
         if(dy < 0) {
-            this.fixUp();
+            this.fixUp(getNodeSide());
         } else {
-            this.fixDown();
+            this.fixDown(getNodeSide());
         }
         return this;
 
@@ -117,16 +136,16 @@ public class NodeModel implements Iterable<NodeModel>{
     public NodeModel translateUpperNodes(int dx,int dy) {
         int ind = index();
         this.translateAbs(dx, dy);
-        parentNode.nodes.subList(0, ind).forEach((node) -> node.translateAbs(0, dy));
+        neighbors().subList(0, ind).forEach((node) -> node.translateAbs(0, dy));
         return this;
     }
 
     public NodeModel translateLowerNodes(int dx, int dy) {
         int ind = index();
-        int len = parentNode.nodes.size();
+        int len = neighborsCnt();
 
         this.translateAbs(dx, dy);
-        parentNode.nodes.subList(ind + 1, len).forEach((node) -> node.translateAbs(0, dy));
+        neighbors().subList(ind + 1, len).forEach((node) -> node.translateAbs(0, dy));
         return this;
     }
 
@@ -153,44 +172,44 @@ public class NodeModel implements Iterable<NodeModel>{
         return moveTo(p.x, p.y);
     }
 
-    public NodeModel fixUp() {
+    public NodeModel fixUp(NodeSide side) {
         NodeModel upBranch = this.findPrevBranch();
         if(upBranch == null) {
             return this;
         }
 
-        NodeModel lowest = upBranch.findLowest();
-        NodeModel highest = this.findHighest();
+        NodeModel lowest = upBranch.findLowest(side);
+        NodeModel highest = this.findHighest(side);
 
         int correction = lowest.getBottom() - highest.getY();
         if(correction > 0) {
             upBranch.translateUpperNodes(0, -correction);
-            upBranch.getParent().firstModel().fixUp();
+            upBranch.getParent().firstModel(side).fixUp(side);
         }
 
         return this;
     }
 
-    public NodeModel fixDown() {
+    public NodeModel fixDown(NodeSide side) {
         NodeModel nextBranch = findNextBranch();
         if(nextBranch == null)
             return this;
 
-        NodeModel lowest = this.findLowest();
-        NodeModel highest = nextBranch.findHighest();
+        NodeModel lowest = this.findLowest(side);
+        NodeModel highest = nextBranch.findHighest(side);
 
         int correction = lowest.getBottom() - highest.getY();
         if(correction > 0) {
             nextBranch.translateLowerNodes(0, correction);
-            nextBranch.getParent().lastModel().fixDown();
+            nextBranch.getParent().lastModel(side).fixDown(side);
         }
 
         return this;
     }
 
-    public NodeModel fix0() {
-        fixUp();
-        return fixDown();
+    public NodeModel fix0(NodeSide side) {
+        fixUp(side);
+        return fixDown(side);
     }
 
     public NodeModel findPrevBranch() {
@@ -215,91 +234,81 @@ public class NodeModel implements Iterable<NodeModel>{
         return curr.nextNode();
     }
 
-    public NodeModel findLowest() {
+    // TODO: make a general version for both sides
+    public NodeModel findLowest(NodeSide side) {
         NodeModel lowest = this;
         NodeModel curr = this;
         while (curr != null) {
             if(curr.getY() > lowest.getY()) {
                 lowest = curr;
             }
-            curr = curr.lastModel();
+            curr = curr.lastModel(side);
         }
 
         return lowest;
     }
 
-    public NodeModel findHighest() {
+    // TODO: make a general version for both sides
+    public NodeModel findHighest(NodeSide side) {
         NodeModel highest = this;
         NodeModel curr = this;
         while (curr != null) {
             if(curr.getY() < highest.getY()) {
                 highest = curr;
             }
-            curr = curr.firstModel();
+            curr = curr.firstModel(side);
         }
 
         return highest;
     }
 
-    public Rectangle computeNodeInvariantBounds() {
-        NodeModel highest = findHighest();
-        NodeModel lowest = findLowest();
+    // TODO: make a general version for both sides
+    public Rectangle computeNodeInvariantBounds(NodeSide side) {
+        NodeModel highest = findHighest(side);
+        NodeModel lowest = findLowest(side);
         return new Rectangle(highest.getX(), highest.getY(),
                 0, lowest.getBottom() - highest.getY());
     }
 
     public boolean isRelative() {
-        return getParent().firstModel() != this;
+        return !isFirst();
     }
 
-    /**
-     * Adds the NodeModel at the given relative position
-     * @param nodeModel
-     * @param dx
-     * @param dy
-     */
-    public void addNodeAtRelPos(NodeModel nodeModel, int dx, int dy) {
-        Point pos = new Point(getNodePos());
-        pos.translate(dx, dy);
-        nodeModel.setNodePos(pos);
-        nodes.add(nodeModel);
-        nodeModel.parentNode = this;
-    }
-
-    public void addNode(NodeModel model) {
-        nodes.add(model);
+    public void addNode(NodeModel model, NodeSide side) {
+        getNodes(side).add(model);
         model.parentNode = this;
     }
 
     // TODO: fix typo
-    public boolean hasChildren() {
-        return !nodes.isEmpty();
+    // TODO: make a general version for both sides
+    public boolean hasChildren(NodeSide side) {
+        return !getNodes(side).isEmpty();
     }
 
     public int index() {
         if(isRootNode()) {
             return 0;
         }
-        return parentNode.nodes.indexOf(this);
+        return neighbors().indexOf(this);
     }
 
     public NodeModel prevNode() {
         int ind = index();
         if(ind > 0) {
-            return parentNode.nodes.get(ind-1);
+            return neighbors().get(ind-1);
         }
 
         return null;
     }
 
     public boolean swapDown() {
-        int index = parentNode.nodes.indexOf(this);
+        int index = index();
         if(index != -1 && index != neighborsCnt()-1) {
             NodeModel currNode = this;
-            NodeModel nextNode = parentNode.nodes.get(index + 1);
+            NodeModel nextNode = neighbors().get(index + 1);
 
-            Rectangle currRect = currNode.computeNodeInvariantBounds();
-            Rectangle nextRect = nextNode.computeNodeInvariantBounds();
+            Rectangle currRect = currNode.computeNodeInvariantBounds(getNodeSide());
+            Rectangle nextRect = nextNode.computeNodeInvariantBounds(getNodeSide());
 
             int currCorrection = (int) (nextRect.getMaxY() - currRect.getMaxY());
             int nextCorrection = (int) (nextRect.getY() - currRect.getY());
@@ -307,16 +316,16 @@ public class NodeModel implements Iterable<NodeModel>{
             currNode.translateAbs(0, currCorrection);
             nextNode.translateAbs(0, -nextCorrection);
 
-            Collections.swap(getParent().nodes, index, index+1);
+            Collections.swap(neighbors(), index, index+1);
             return true;
         }
         return false;
     }
 
     public boolean swapUp() {
-        int index = parentNode.nodes.indexOf(this);
+        int index = index();
         if(index != -1 && index != 0) {
-            NodeModel prevNode = parentNode.nodes.get(index - 1);
+            NodeModel prevNode = neighbors().get(index - 1);
             return prevNode.swapDown();
         }
         return false;
@@ -359,8 +368,14 @@ public class NodeModel implements Iterable<NodeModel>{
         fireChangeEvent(event);
     }
 
-    public ArrayList<NodeModel> getNodes() {
-        return nodes;
+    public ArrayList<NodeModel> getNodes(NodeSide side) {
+        switch (side){
+            case LEFT:
+                return getLeftNodes();
+            case RIGHT:
+                return getRightNodes();
+        }
+        return null;
     }
 
     public Point getPosition() {
@@ -380,11 +395,11 @@ public class NodeModel implements Iterable<NodeModel>{
     }
 
     public boolean isRootNode() {
-        return parentNode == null;
+        return getParent() == null;
     }
 
-    public NodeModelIterator iterator() {
-        return new NodeModelIterator();
+    public NodeModelIterator iterator(NodeSide side) {
+        return new NodeModelIterator(side);
     }
 
     public NodeModel getParent() {
@@ -398,7 +413,7 @@ public class NodeModel implements Iterable<NodeModel>{
 
         int index = index();
         if(index != 0) {
-            return getParent().getNodes().get(index - 1);
+            return neighbors().get(index - 1);
         }
 
         return null;
@@ -421,10 +436,11 @@ public class NodeModel implements Iterable<NodeModel>{
             return true;
         }
 
-        return getParent().lastModel() == this;
+        return neighbors().get(neighborsCnt() - 1) == this;
     }
 
-    public NodeModel computeSmallerUpperBranchNode() {
+    @Deprecated
+    public NodeModel computeSmallerUpperBranchNode(NodeSide side) {
         if(isRootNode()) {
             return null;
         }
@@ -443,7 +459,7 @@ public class NodeModel implements Iterable<NodeModel>{
                 lowest = model;
                 return lowest;
             }
-            model = model.lastModel();
+            model = model.lastModel(side);
         }
 
         return null;
@@ -456,8 +472,8 @@ public class NodeModel implements Iterable<NodeModel>{
         }
 
         int ind = index();
-        if(ind < parentNode.getNodes().size()-1) {
-            return parentNode.getNodes().get(ind + 1);
+        if(ind < neighborsCnt() - 1) {
+            return neighbors().get(ind + 1);
         }
 
         return null;
@@ -467,7 +483,7 @@ public class NodeModel implements Iterable<NodeModel>{
         if(isRootNode())
             return false;
 
-        return getParent().firstModel() == this;
+        return neighbors().get(0) == this;
     }
 
     public int computeTotalInset() {
@@ -495,6 +511,22 @@ public class NodeModel implements Iterable<NodeModel>{
         return pos.x;
     }
 
+    public ArrayList<NodeModel> getRightNodes() {
+        return rightNodes;
+    }
+
+    public ArrayList<NodeModel> getLeftNodes() {
+        return leftNodes;
+    }
+
+    public NodeSide getNodeSide() {
+        return nodeSide;
+    }
+
+    public void setNodeSide(NodeSide nodeSide) {
+        this.nodeSide = nodeSide;
+    }
+
     public NodeStylesheet getProps() {
         return props;
     }
@@ -505,6 +537,12 @@ public class NodeModel implements Iterable<NodeModel>{
 
     public Font getCachedFont() {
         return cachedFont;
+    }
+
+    @Deprecated
+    @Override
+    public Iterator<NodeModel> iterator() {
+        return new ConcatIter<NodeModel>(iterator(NodeSide.RIGHT), iterator(NodeSide.LEFT));
     }
 
     public static class NodeModelChangeEvent extends ChangeEvent {
@@ -538,9 +576,11 @@ public class NodeModel implements Iterable<NodeModel>{
     }
 
     private class NodeModelIterator implements Iterator<NodeModel> {
+        private final NodeSide side;
         Stack<NodeModel> nodes = new Stack<>();
 
-        public NodeModelIterator() {
+        public NodeModelIterator(NodeSide side) {
+            this.side = side;
             nodes.push(NodeModel.this);
         }
 
@@ -557,12 +597,17 @@ public class NodeModel implements Iterable<NodeModel>{
 
             NodeModel ret = nodes.pop();
 
-            for (int i = ret.nodes.size() - 1; i >= 0; i--) {
-                nodes.push(ret.nodes.get(i));
+            for (int i = ret.getNodes(side).size() - 1; i >= 0; i--) {
+                nodes.push(ret.getNodes(side).get(i));
             }
 
             return ret;
         }
     }
 
+
+    public enum NodeSide {
+        LEFT,
+        RIGHT
+    }
 }

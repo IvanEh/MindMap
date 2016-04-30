@@ -13,6 +13,7 @@ public class MindMapDrawer extends JPanel implements MindMapController {
     NodeView rootNode;
     NodeModel model;
     LineManager lineManager;
+    NodeModel.NodeSide side = NodeModel.NodeSide.RIGHT;
 
 
     public MindMapDrawer(NodeModel rootModel) {
@@ -118,20 +119,20 @@ public class MindMapDrawer extends JPanel implements MindMapController {
     @Override
     public NodeView onNodeModelInsert(NodeView view, NodeModel model) {
         Point anchor;
-        boolean hasChildren = view.getModel().hasChildren();
+        boolean hasChildren = view.getModel().hasChildren(side);
         NodeView retView = this.manageSingleModel(model);
 
-        view.getModel().addNode(model);
+        view.getModel().addNode(model, side);
         if(hasChildren) {
-            NodeModel lastModel = view.getModel().lastModel().prevNode();
-            NodeModel lowestModel = lastModel.findLowest();
+            NodeModel lastModel = view.getModel().lastModel(side).prevNode();
+            NodeModel lowestModel = lastModel.findLowest(side);
 
             model.setNodePos(new Point(lastModel.getNodePos()));
             retView.translate(0, lowestModel.getBottom() - model.getY() + view.getModel().getProps().getMinimumGap());
-            model.fixDown();
+            model.fixDown(side);
 
             int correction = (model.getBottom() - lastModel.getY() - view.getModel().getHeight())/2;
-            view.getModel().firstModel().translateRelWithAlignment(0, -correction);
+            view.getModel().firstModel(side).translateRelWithAlignment(0, -correction);
         } else {
 
             anchor = new Point(view.getModel().getNodePos());

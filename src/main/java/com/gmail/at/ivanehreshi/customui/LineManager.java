@@ -30,7 +30,7 @@ public class LineManager {
         Point origin = mindMapLayout.getOrigin(mindMapDrawer);
 
         mindMapDrawer.getModelToViewMap().keySet().forEach(nodeModel -> {
-            nodeModel.getNodes().forEach(to -> {
+            nodeModel.getNodes(mindMapDrawer.side).forEach(to -> {
                 drawLine(g2d, origin, nodeModel, to);
             });
         });

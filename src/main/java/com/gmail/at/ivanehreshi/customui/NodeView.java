@@ -11,8 +11,9 @@ public class NodeView extends JPanel {
     private MindMapController mindMapController;
     protected NodeModel model;
 
+    @Deprecated
     public NodeView(boolean dummy) {
-        model = new NodeModel("Root");
+        model = new NodeModel("Root", NodeModel.NodeSide.RIGHT);
 
     }
 
@@ -55,8 +56,9 @@ public class NodeView extends JPanel {
         return this;
     }
 
+    @Deprecated
     public NodeView insertNode(String s) {
-        return insertNode(new NodeModel(s, getModel()));
+        return insertNode(new NodeModel(s, getModel(), NodeModel.NodeSide.RIGHT));
     }
 
     @Override

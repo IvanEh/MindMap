@@ -49,4 +49,12 @@ public class ConcatIter<T> implements Iterator<T> {
 
         return second;
     }
+
+    public Iterator<T> getFirst() {
+        return first;
+    }
+
+    public Iterator<T> getSecond() {
+        return second;
+    }
 }

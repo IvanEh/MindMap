@@ -5,6 +5,7 @@ import com.gmail.at.ivanehreshi.utils.ConcatIter;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.event.ChangeListener;
+import javax.xml.soap.Node;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
@@ -444,6 +445,52 @@ public class NodeModel implements Iterable<NodeModel>{
         return neighbors().get(neighborsCnt() - 1) == this;
     }
 
+    /**
+     * Makes the all the coordinates relative to the parent
+     * Called on all the descendant nodes
+     * @param isOrigin if is true then the relative root will have (0, 0) coordinate
+     */
+    public void makeCoordsRelative(boolean isOrigin) {
+        Point rel = getNodePos();
+        getNodes(NodeSide.RIGHT).forEach(node -> {
+            node.makeCoordsRelative(false);
+        });
+        getNodes(NodeSide.LEFT).forEach(node -> {
+            node.makeCoordsRelative(false);
+        });
+        if (!isOrigin) {
+            this.setNodePos(computeRelativePosition());
+        } else {
+            this.setNodePos(new Point(0, 0));
+        }
+    }
+
+    /**
+     * Restores absolute coordinates. Typically called after makeCoordsRelative()
+     * Called on descendant nodes
+     */
+    public void makeCoordsAbs() {
+        int nx = getX() + getParent().getX();
+        int ny = getY() + getParent().getY();
+        this.setNodePos(nx, ny);
+        getNodes(NodeSide.RIGHT).forEach( node -> node.makeCoordsAbs());
+        getNodes(NodeSide.LEFT).forEach( node -> node.makeCoordsAbs());
+    }
+
+    @Deprecated
+    public void inverseLeaningIfRelativeCoords() {
+        ArrayList<NodeModel> temp = leftNodes;
+        leftNodes = rightNodes;
+        rightNodes = temp;
+        this.setNodeSide(getNodeSide().inverse());
+        int dx = getX() - getParent().getWidth() + getWidth();
+        setNodePos(-dx, getY());
+    }
+
+    private void setNodePos(int nx, int ny) {
+        getMutNodePos().setLocation(nx, ny);
+    }
+
     @Deprecated
     public NodeModel computeSmallerUpperBranchNode(NodeSide side) {
         if(isRootNode()) {
@@ -520,6 +567,14 @@ public class NodeModel implements Iterable<NodeModel>{
         return rightNodes;
     }
 
+    public void setRightNodes(ArrayList<NodeModel> rightNodes) {
+        this.rightNodes = rightNodes;
+    }
+
+    public void setLeftNodes(ArrayList<NodeModel> leftNodes) {
+        this.leftNodes = leftNodes;
+    }
+
     public ArrayList<NodeModel> getLeftNodes() {
         return leftNodes;
     }
@@ -546,8 +601,8 @@ public class NodeModel implements Iterable<NodeModel>{
 
     @Override
     public Iterator<NodeModel> iterator() {
-        Iterator<NodeModel> it = new ConcatIter<NodeModel>(iterator(NodeSide.RIGHT), iterator(NodeSide.LEFT));
-        it.next();
+        ConcatIter<NodeModel> it = new ConcatIter<NodeModel>(iterator(NodeSide.RIGHT), iterator(NodeSide.LEFT));
+        it.getSecond().next();
         return it;
     }
 
@@ -567,6 +622,15 @@ public class NodeModel implements Iterable<NodeModel>{
         NodeModel p = getParent();
         if(p != null)
             p.getNodes(this.getNodeSide()).remove(this);
+    }
+
+    public ArrayList<NodeModel> getFixedNodes() {
+        ArrayList<NodeModel> nodes = new ArrayList<>();
+        nodes.ensureCapacity(getRightNodes().size() + getLeftNodes().size());
+        nodes.addAll(getRightNodes());
+        nodes.addAll(getLeftNodes());
+        return nodes;
+
     }
 
 
@@ -605,6 +669,7 @@ public class NodeModel implements Iterable<NodeModel>{
         }
     }
 
+
     private class NodeModelIterator implements Iterator<NodeModel> {
         private final NodeSide side;
         Stack<NodeModel> nodes = new Stack<>();
@@ -639,6 +704,18 @@ public class NodeModel implements Iterable<NodeModel>{
     public enum NodeSide {
         LEFT,
         RIGHT,
-        ROOT
+        ROOT;
+
+        public NodeSide inverse() {
+            switch (this) {
+                case LEFT:
+                    return RIGHT;
+                case RIGHT:
+                    return LEFT;
+                case ROOT:
+                    return ROOT;
+            }
+            return ROOT;
+        }
     }
 }

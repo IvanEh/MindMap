@@ -64,12 +64,20 @@ public class NodeView extends JPanel {
         setFont(model.getCachedFont());
     }
 
-    public NodeView insertNode(NodeModel model) {
+    public NodeView insertNewNode(NodeModel model) {
         if(mindMapController == null) {
             throw new IllegalStateException("");
         }
 
         return mindMapController.onNodeModelInsert(this, model);
+    }
+
+    public NodeView insertExisting(NodeModel model) {
+        if(mindMapController == null) {
+            throw new IllegalStateException("");
+        }
+
+        return mindMapController.onNodeModelInsertExisting(this, model);
     }
 
     public NodeView translate(int dx, int dy) {
@@ -101,8 +109,8 @@ public class NodeView extends JPanel {
     }
 
     @Deprecated
-    public NodeView insertNode(String s) {
-        return insertNode(new NodeModel(s, getModel(), NodeModel.NodeSide.ROOT));
+    public NodeView insertNewNode(String s) {
+        return insertNewNode(new NodeModel(s, getModel(), NodeModel.NodeSide.ROOT));
     }
 
     @Override
@@ -208,11 +216,12 @@ public class NodeView extends JPanel {
         return (int) getLocation().getY() + (int) getSize().getHeight();
     }
 
-    public void remove() {
+    public NodeModel remove() {
         setVisible(false);
         if(nodeViewController != null) {
-            mindMapController.onViewRemove(this);
+            return mindMapController.onViewRemove(this);
         }
+        return this.getModel();
     }
 
     public boolean isSelected() {

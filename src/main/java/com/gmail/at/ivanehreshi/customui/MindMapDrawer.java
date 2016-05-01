@@ -10,7 +10,11 @@ import javax.swing.event.ChangeEvent;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class MindMapDrawer extends JPanel implements MindMapController {
     Map<NodeModel, NodeView> modelToViewMap = new HashMap<>();
@@ -142,6 +146,7 @@ public class MindMapDrawer extends JPanel implements MindMapController {
      * @param model
      * @return
      */
+    // TODO: rename to onNodeViewModelInsert
     @Override
     public NodeView onNodeModelInsert(NodeView view, NodeModel model) {
         NodeView retView = null;
@@ -198,12 +203,51 @@ public class MindMapDrawer extends JPanel implements MindMapController {
     }
 
     @Override
-    public void onViewRemove(NodeView view) {
+    public NodeModel onViewRemove(NodeView view) {
         NodeModel model = view.getModel();
         model.removeFromParent();
         for(NodeModel m: model) {
             this.remove(getModelToViewMap().remove(m));
         }
+        return model;
+    }
+
+    @Override
+    public NodeView onNodeModelInsertExisting(NodeView view, NodeModel model) {
+        final ArrayList<NodeModel> EMPTY = new ArrayList<>();
+
+        model.makeCoordsRelative(true);
+
+        // HACK: make NodeModel think it has no children
+        ArrayList<NodeModel> right = model.getRightNodes();
+        ArrayList<NodeModel> left = model.getLeftNodes();
+        model.setRightNodes(EMPTY);
+        model.setLeftNodes(EMPTY);
+
+        NodeModel.NodeSide oldSide = model.getNodeSide();
+
+        NodeView retView = view.insertNewNode(model);
+
+
+        // Remove HACK!
+        if(oldSide != model.getNodeSide()) {
+            model.setRightNodes(left);
+            model.setLeftNodes(right);
+            model.getFixedNodes().forEach(node -> node.forEach(x -> x.inverseLeaningIfRelativeCoords()));
+        } else {
+            model.setRightNodes(right);
+            model.setLeftNodes(left);
+        }
+
+        model.getFixedNodes().forEach(node -> {
+            node.makeCoordsAbs();
+            node.forEach(_node -> manageSingleModel(_node));
+        });
+        model.fix0(NodeModel.NodeSide.LEFT);
+        model.fix0(NodeModel.NodeSide.RIGHT);
+
+
+        return retView;
     }
 
     private NodeView createLaidOutView(NodeView parent, NodeModel model) {

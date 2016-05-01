@@ -34,7 +34,7 @@ public class NodeViewController extends MouseAdapter{
         NodeView view = getNodeView(e);
 
         if(e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
-            view.insertNode("abcdefgs");
+            view.insertNewNode("abcdefgs");
         }
         if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 1){
             if((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK) {

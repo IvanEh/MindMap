@@ -9,4 +9,10 @@ public class Strings {
         public static final String ABOUT = "Про програму";
     }
 
+    public static class Popup {
+        public static final String ADD_NODE = "Новий вузол";
+        public static final String REMOVE_NODE = "Видалити";
+        public static final String CUT_NODE = "Вирізати";
+        public static final String INSERT_NODE = "Вставити";
+    }
 }

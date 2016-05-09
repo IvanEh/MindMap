@@ -8,6 +8,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.geom.Rectangle2D;
 
 public class NodeView extends JPanel {
@@ -51,6 +53,18 @@ public class NodeView extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 nodeViewController.onEditAction(e);
+                finishEditing();
+            }
+        });
+
+        editor.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) { }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                nodeViewController.onEditAction(new ActionEvent(editor, 0, ""));
+                finishEditing();
             }
         });
     }
@@ -93,6 +107,7 @@ public class NodeView extends JPanel {
 
     public void edit() {
         editor.setVisible(true);
+        editor.grabFocus();
         editor.setText(getModel().getTitle());
         Rectangle2D textArea = getTextArea();
 

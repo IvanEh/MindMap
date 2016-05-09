@@ -8,6 +8,8 @@ import com.gmail.at.ivanehreshi.models.NodeModel;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -32,6 +34,7 @@ public class MindMapDrawer extends JPanel implements MindMapController {
 
         setLayout(new MindMapLayout());
         lineManager = new LineManager(this);
+        setFocusable(true);
 
         createGui();
         createDebugGui();
@@ -44,6 +47,12 @@ public class MindMapDrawer extends JPanel implements MindMapController {
 
         addMouseMotionListener(moveController);
         addMouseListener(moveController);
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                grabFocus();
+            }
+        });
 
     }
 

@@ -1,5 +1,7 @@
 package com.gmail.at.ivanehreshi.customui.controllers;
 
+import com.gmail.at.ivanehreshi.actions.mindmap.AddNode;
+import com.gmail.at.ivanehreshi.actions.mindmap.EditNodeTitle;
 import com.gmail.at.ivanehreshi.customui.NodeView;
 
 import javax.swing.*;
@@ -54,11 +56,12 @@ public class NodeViewController extends MouseAdapter{
         lastPosition = null;
     }
 
+    private final EditNodeTitle editNodeTitleAction = new EditNodeTitle();
     public void onEditAction(ActionEvent e) {
         JTextField field = (JTextField) e.getSource();
         NodeView view = (NodeView) field.getParent();
 
-        view.finishEditing();
-        view.getModel().setTitle(field.getText());
+        editNodeTitleAction.actionPerformed(new ActionEvent(view, 0, ""));
+//        view.getModel().setTitle(field.getText());
     }
 }

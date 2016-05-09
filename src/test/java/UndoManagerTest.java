@@ -24,12 +24,12 @@ public class UndoManagerTest {
         assertFalse(undoManager.isEmpty());
 
         undoManager.undo();
-        assertFalse(undoManager.isFull());
+        assertTrue(undoManager.isFull());
         assertFalse(undoManager.isEmpty());
 
         undoManager.undo();
-        assertFalse(undoManager.isFull());
-        assertTrue(undoManager.isEmpty());
+        assertTrue(undoManager.isFull());
+        assertFalse(undoManager.isEmpty());
     }
 
     @Test
@@ -49,8 +49,8 @@ public class UndoManagerTest {
         assertEquals(3, ((MockUndoableCommand) undoManager.undo()).id);
         assertEquals(2, ((MockUndoableCommand) undoManager.undo()).id);
 
-        assertTrue(undoManager.isEmpty());
-        assertFalse(undoManager.isFull());
+        assertFalse(undoManager.isEmpty());
+        assertTrue(undoManager.isFull());
 
         undoManager.redo(new MockUndoableCommand(5));
         undoManager.redo(new MockUndoableCommand(6));
@@ -59,6 +59,26 @@ public class UndoManagerTest {
         assertEquals(7, ((MockUndoableCommand) undoManager.undo()).id);
         assertEquals(6, ((MockUndoableCommand) undoManager.undo()).id);
         assertEquals(5, ((MockUndoableCommand) undoManager.undo()).id);
+    }
+
+    @Test
+    public void testNewCommandInterruption() {
+        UndoManager undoManager = new UndoManager(3);
+
+        undoManager.redo(new MockUndoableCommand(0));
+        undoManager.redo(new MockUndoableCommand(1));
+        undoManager.redo(new MockUndoableCommand(2));
+
+        undoManager.undo();
+        undoManager.undo();
+
+        undoManager.redo(new MockUndoableCommand(10));
+
+        assertEquals(10, ((MockUndoableCommand) undoManager.undo()).id);
+        assertEquals(10, ((MockUndoableCommand) undoManager.redo()).id);
+        assertEquals(10, ((MockUndoableCommand) undoManager.undo()).id);
+        assertEquals(0, ((MockUndoableCommand) undoManager.undo()).id);
+
     }
 
     static class MockUndoableCommand implements UndoableCommand{

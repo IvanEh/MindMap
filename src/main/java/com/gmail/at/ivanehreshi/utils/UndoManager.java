@@ -1,52 +1,86 @@
 package com.gmail.at.ivanehreshi.utils;
 
-import com.gmail.at.ivanehreshi.actions.Command;
 import com.gmail.at.ivanehreshi.actions.UndoableCommand;
 
 public class UndoManager {
     private final int size;
     private final UndoableCommand[] deque;
-    private int tail;
-    private int free;
-    private int curr;
+    private int beforeTail;
+    private int last;
+    private int currUndo;
     private boolean full = false;
+    private boolean exhausted = false;
 
     public UndoManager(int size) {
         this.size = size;
         this.deque = new UndoableCommand[this.size];
-        tail = 0;
-        free = 0;
-        curr = 0;
+        beforeTail = size - 1;
+        last = beforeTail;
+        currUndo = beforeTail;
     }
 
     public void redo(UndoableCommand command) {
         command.redo();
-        if(isFull()) {
-            tail = normIndex(tail + 1);
+        boolean flag = false;
+        if(isFull() && currUndo == last) {
+            beforeTail = normIndex(beforeTail + 1);
+            flag = true;
         }
-        deque[free] = command;
-        curr = free;
 
-        free = normIndex(free + 1);
+        currUndo = normIndex(currUndo + 1);
+        deque[currUndo] = command;
+        last = currUndo;
+
         if(isEmpty()) {
             full = true;
+        } else if(!flag){
+            full = false;
         }
+        exhausted = false;
     }
 
+    public UndoableCommand redo() {
+        if(isEmpty()) {
+            return null;
+        }
+        if(currUndo == last) {
+            return null;
+        }
+
+        int currDo = normIndex(currUndo + 1);
+
+        UndoableCommand command = deque[currDo];
+        command.redo();
+
+        currUndo = currDo;
+
+        exhausted = false;
+        return command;
+    }
+
+
+    // FIX: undo after last command undone
     public UndoableCommand undo() {
         if(isEmpty()) {
             return null;
         }
-        UndoableCommand command = deque[curr];
+        if(exhausted) {
+            return null;
+        }
+        UndoableCommand command = deque[currUndo];
         command.undo();
 
-        free = curr;
-        curr = normIndex(curr - 1);
+        currUndo = normIndex(currUndo - 1);
 
-        if(isFull())
-            full = false;
+        if(currUndo == beforeTail) {
+            exhausted = true;
+        }
 
         return command;
+    }
+
+    public int tail() {
+        return normIndex(beforeTail + 1);
     }
 
     public boolean isFull() {
@@ -54,7 +88,7 @@ public class UndoManager {
     }
 
     public boolean isEmpty() {
-        return tail == free && !full;
+        return beforeTail == last && !full;
     }
 
     public int getSize() {

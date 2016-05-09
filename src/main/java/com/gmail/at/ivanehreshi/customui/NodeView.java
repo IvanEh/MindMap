@@ -268,6 +268,10 @@ public class NodeView extends JPanel {
         return "view( " + getModel() + ") at + getLocation()" ;
     }
 
+    public String getEditorText() {
+        return editor.getText();
+    }
+
     enum State {
         EDIT,
         STATIC

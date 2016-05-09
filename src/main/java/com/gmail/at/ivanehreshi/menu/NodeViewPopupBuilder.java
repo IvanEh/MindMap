@@ -2,11 +2,13 @@ package com.gmail.at.ivanehreshi.menu;
 
 import com.gmail.at.ivanehreshi.Strings;
 import com.gmail.at.ivanehreshi.actions.YAction;
+import com.gmail.at.ivanehreshi.actions.mindmap.AddNode;
 import com.gmail.at.ivanehreshi.customui.NodeView;
 import com.gmail.at.ivanehreshi.models.NodeModel;
 import com.gmail.at.ivanehreshi.utils.CopyCutBuffer;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 
 public class NodeViewPopupBuilder {
@@ -20,13 +22,14 @@ public class NodeViewPopupBuilder {
     }
 
     JMenuItem buildAddNode() {
-        JMenuItem addNode = new JMenuItem(new YAction(Strings.Popup.ADD_NODE) {
+        JMenuItem addNode = new JMenuItem(new AddNode() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JMenuItem source = (JMenuItem) e.getSource();
                 JPopupMenu popup = (JPopupMenu) source.getParent();
                 NodeView view = (NodeView) popup.getInvoker();
-                view.insertNewNode("d");
+
+                super.actionPerformed(new ActionEvent(view, ActionEvent.ACTION_FIRST, ""));
             }
         });
 

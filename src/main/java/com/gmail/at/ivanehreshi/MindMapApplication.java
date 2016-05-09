@@ -2,16 +2,19 @@ package com.gmail.at.ivanehreshi;
 
 import com.gmail.at.ivanehreshi.menu.MenuBarBuilder;
 import com.gmail.at.ivanehreshi.panels.RootLayoutPanel;
+import com.gmail.at.ivanehreshi.utils.UndoManager;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class MindMapApplication extends JFrame {
 
+    private static final int UNDO_HISTORY_SIZE = 10;
     private static MindMapApplication instance;
 
     public static final String FRAME_TITLE = "Mind map";
     public static final Dimension WINDOW_SIZE = new Dimension(500, 600);
+    private static UndoManager undoManagerInstance;
 
     public JMenuBar menuBar;
     public JPanel rootLayoutPanel;
@@ -24,6 +27,13 @@ public class MindMapApplication extends JFrame {
         this.setLocationRelativeTo(null); // center window
 
         initGui();
+    }
+
+    public static UndoManager getUndoManagerInstance() {
+        if(undoManagerInstance == null) {
+            undoManagerInstance = new UndoManager(UNDO_HISTORY_SIZE);
+        }
+        return undoManagerInstance;
     }
 
     private void initGui() {

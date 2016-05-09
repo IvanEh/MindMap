@@ -3,6 +3,7 @@ package com.gmail.at.ivanehreshi.actions.menu.file;
 
 import com.gmail.at.ivanehreshi.MindMapApplication;
 import com.gmail.at.ivanehreshi.Strings;
+import com.gmail.at.ivanehreshi.actions.Command;
 import com.gmail.at.ivanehreshi.actions.YAction;
 
 import java.awt.event.ActionEvent;
@@ -14,7 +15,12 @@ public class CloseAction extends YAction{
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        MindMapApplication.getInstance().dispose();
+    public Command getCommand(ActionEvent event) {
+        return new Command() {
+            @Override
+            public void redo() {
+                MindMapApplication.getInstance().dispose();
+            }
+        };
     }
 }

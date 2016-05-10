@@ -19,14 +19,14 @@ public class LineManager {
         Point end = new Point();
 
         if(modelTo.isRight()) {
-            start.x = origin.x + modelFrom.getX() + modelFrom.getWidth();
+            start.x = origin.x + modelFrom.getX() + modelFrom.getWidth() - NodeView.BORDER_THICKNESS;
             start.y = origin.y + modelFrom.getY() + modelFrom.getHeight() / 2;
-            end.x = origin.x + modelTo.getX();
+            end.x = origin.x + modelTo.getX() + NodeView.BORDER_THICKNESS;;
             end.y = origin.y + modelTo.getY() + modelTo.getHeight()/2;
         } else {
-            start.x = origin.x + modelFrom.getX();
+            start.x = origin.x + modelFrom.getX() + NodeView.BORDER_THICKNESS;;
             start.y = origin.y + modelFrom.getY() + modelFrom.getHeight()/2;
-            end.x = origin.x + modelTo.getX() + modelTo.getWidth();
+            end.x = origin.x + modelTo.getX() + modelTo.getWidth() - NodeView.BORDER_THICKNESS;;
             end.y = origin.y + modelTo.getY() + modelTo.getHeight() / 2;
         }
 

@@ -6,13 +6,14 @@ import com.gmail.at.ivanehreshi.models.NodeModel;
 import javax.swing.event.ChangeListener;
 import java.util.ArrayList;
 
-/**
- * Created by ivaneh on 28.04.16.
- */
 public interface MindMapController extends ChangeListener {
+
+
     void onViewTranslate(NodeView view, int dx, int dy);
 
     NodeView onNodeModelInsert(NodeView view, NodeModel model);
+
+    void onNodeModelCreated(NodeModel model);
 
     ArrayList<NodeView> getSelection();
 
@@ -45,4 +46,7 @@ public interface MindMapController extends ChangeListener {
     NodeModel onViewRemove(NodeView view);
 
     NodeView onNodeModelInsertExisting(NodeView view, NodeModel model);
+
+
+
 }

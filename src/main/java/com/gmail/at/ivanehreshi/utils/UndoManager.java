@@ -19,8 +19,7 @@ public class UndoManager {
         currUndo = beforeTail;
     }
 
-    public void redo(UndoableCommand command) {
-        command.redo();
+    public void push(UndoableCommand command) {
         boolean flag = false;
         if(isFull() && currUndo == last) {
             beforeTail = normIndex(beforeTail + 1);
@@ -101,5 +100,10 @@ public class UndoManager {
         if(i >= size)
             return 0;
         return i;
+    }
+
+    public void redo(UndoableCommand command) {
+        command.redo();
+        push(command);
     }
 }

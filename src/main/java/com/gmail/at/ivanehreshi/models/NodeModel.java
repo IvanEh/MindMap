@@ -23,6 +23,7 @@ public class NodeModel implements Iterable<NodeModel>{
     private ArrayList<NodeModel> rightNodes;
     private NodeSide nodeSide;
     private ArrayList<ChangeListener> changeListeners;
+    private ArrayList<BeforeChangeListener> beforeChangeListeners;
     private NodeModel parentNode;
     private NodeStylesheet props;
     private Point pos;
@@ -37,6 +38,7 @@ public class NodeModel implements Iterable<NodeModel>{
         rightNodes = new ArrayList<>();
         nodeSide = side;
         changeListeners = new ArrayList<>();
+        beforeChangeListeners = new ArrayList<>();
         pos = new Point();
         props = new NodeStylesheet();
 
@@ -101,9 +103,16 @@ public class NodeModel implements Iterable<NodeModel>{
     }
 
     public NodeModel translateAbs(int dx, int dy) {
+        fireBeforeChangeEvent();
+
+        Point backup = getNodePos();
+
         pos.translate(dx, dy);
         getLeftNodes().forEach(node -> node.translateAbs(dx, dy));
         getRightNodes().forEach(node -> node.translateAbs(dx, dy));
+
+        getChangeListeners().forEach(l -> l.stateChanged(
+                new ChangeEvent(this, ChangeEvent.Cause.BOUNDS, backup)));
 
         return this;
     }
@@ -336,8 +345,27 @@ public class NodeModel implements Iterable<NodeModel>{
         changeListeners.add(l);
     };
 
+    public void addBeforeChangeListener(BeforeChangeListener l) {
+        beforeChangeListeners.add(l);
+    }
+
+    public void addChangeListener(ChangeListener l, ChangeEvent.Cause cause) {
+        addChangeListener(e -> {
+            if (e instanceof NodeModel.ChangeEvent){
+                NodeModel.ChangeEvent event = (NodeModel.ChangeEvent) e;
+                if(event.getCause().equals(cause)) {
+                    l.stateChanged(event);
+                }
+            }
+        });
+    }
+
     public void removeChangeListener(ChangeListener l) {
         changeListeners.remove(l);
+    }
+
+    public void removeBeforeChangeListener(BeforeChangeListener l) {
+        beforeChangeListeners.remove(l);
     }
 
     public String getTitle() {
@@ -368,6 +396,10 @@ public class NodeModel implements Iterable<NodeModel>{
     protected void fireChangeEvent() {
         javax.swing.event.ChangeEvent event = new javax.swing.event.ChangeEvent(this);
         fireChangeEvent(event);
+    }
+
+    protected void fireBeforeChangeEvent() {
+        beforeChangeListeners.forEach(l -> l.beforeChange(this));
     }
 
     public ArrayList<NodeModel> getNodes(NodeSide side) {
@@ -599,6 +631,10 @@ public class NodeModel implements Iterable<NodeModel>{
         return cachedFont;
     }
 
+    public ArrayList<ChangeListener> getChangeListeners() {
+        return changeListeners;
+    }
+
     @Override
     public Iterator<NodeModel> iterator() {
         ConcatIter<NodeModel> it = new ConcatIter<NodeModel>(iterator(NodeSide.RIGHT), iterator(NodeSide.LEFT));
@@ -633,6 +669,18 @@ public class NodeModel implements Iterable<NodeModel>{
 
     }
 
+    public Dimension getSize() {
+        return new Dimension(width, height);
+    }
+
+    public void setSize(Dimension size) {
+        this.width = (int) size.getWidth();
+        this.height = (int) size.getHeight();
+    }
+
+    public interface BeforeChangeListener {
+        void beforeChange(NodeModel model);
+    }
 
     public static class ChangeEvent extends javax.swing.event.ChangeEvent {
         private final Cause cause;
@@ -649,7 +697,7 @@ public class NodeModel implements Iterable<NodeModel>{
          * @param source the Object that is the source of the event
          *               (typically <code>this</code>)
          */
-        public ChangeEvent(Object source, Cause cause, Object data) {
+        public ChangeEvent(NodeModel source, Cause cause, Object data) {
             super(source);
             this.cause = cause;
             this.data = data;

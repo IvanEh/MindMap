@@ -83,6 +83,7 @@ public class NodeView extends JPanel {
             throw new IllegalStateException("");
         }
 
+        mindMapController.onNodeModelCreated(model);
         return mindMapController.onNodeModelInsert(this, model);
     }
 

@@ -1,5 +1,8 @@
 package com.gmail.at.ivanehreshi.customui;
 
+import com.gmail.at.ivanehreshi.MindMapApplication;
+import com.gmail.at.ivanehreshi.actions.UndoableCommand;
+import com.gmail.at.ivanehreshi.customui.controllers.ChangesTracker;
 import com.gmail.at.ivanehreshi.customui.controllers.MindMapController;
 import com.gmail.at.ivanehreshi.customui.controllers.MindMapMoveController;
 import com.gmail.at.ivanehreshi.menu.NodeViewPopupBuilder;
@@ -8,6 +11,7 @@ import com.gmail.at.ivanehreshi.models.NodeModel;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -26,6 +30,8 @@ public class MindMapDrawer extends JPanel implements MindMapController {
     NodeModel.NodeSide side = NodeModel.NodeSide.RIGHT;
     private JPopupMenu nodePopup = new NodeViewPopupBuilder.Director().build();
     private ArrayList<NodeView> selectedNodes = new ArrayList<>();
+    private ChangesTracker<Point> positionTracker;
+    private ChangesTracker<Dimension> dimensionTracker;
 
 
     public MindMapDrawer(NodeModel rootModel) {
@@ -39,7 +45,22 @@ public class MindMapDrawer extends JPanel implements MindMapController {
         createGui();
         createDebugGui();
         createModelProjection();
+        createChangesTrackers();
         setUpControllers();
+    }
+
+    private void createChangesTrackers() {
+        positionTracker = new ChangesTracker<>(
+                model ->  model.getPosition(),
+                (model, prop) -> {
+                    model.setNodePos(prop);
+                    getNodeViewByModel(model).revalidate();
+                });
+
+        dimensionTracker = new ChangesTracker<>(
+                model -> model.getSize(),
+                (model, dim) -> model.setSize(dim)
+        );
     }
 
     private void setUpControllers() {
@@ -180,6 +201,18 @@ public class MindMapDrawer extends JPanel implements MindMapController {
         }));
 
         return retView;
+    }
+
+    @Override
+    public void onNodeModelCreated(NodeModel model) {
+        model.addBeforeChangeListener(
+                m -> getPositionTracker().getRetrieveUnchangedListener()
+                    .actionPerformed(new ActionEvent(model, 0, "")));
+        model.addChangeListener(
+                e -> getPositionTracker().getRetrieveChangedListener()
+                    .actionPerformed(new ActionEvent(model, 0, "")),
+                NodeModel.ChangeEvent.Cause.BOUNDS
+        );
     }
 
     public void onModelChangeContent(NodeModel.ChangeEvent ch) {
@@ -340,5 +373,13 @@ public class MindMapDrawer extends JPanel implements MindMapController {
     @Override
     public void onModelViewContextMenu(NodeView view, int x, int y) {
         nodePopup.show(view, x, y);
+    }
+
+    public ChangesTracker<Point> getPositionTracker() {
+        return positionTracker;
+    }
+
+    public ChangesTracker<Dimension> getDimensionTracker() {
+        return dimensionTracker;
     }
 }

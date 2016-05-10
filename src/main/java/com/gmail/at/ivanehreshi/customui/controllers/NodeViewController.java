@@ -1,14 +1,19 @@
 package com.gmail.at.ivanehreshi.customui.controllers;
 
+import com.gmail.at.ivanehreshi.MindMapApplication;
+import com.gmail.at.ivanehreshi.actions.UndoableCommand;
 import com.gmail.at.ivanehreshi.actions.mindmap.AddNode;
 import com.gmail.at.ivanehreshi.actions.mindmap.EditNodeTitle;
+import com.gmail.at.ivanehreshi.customui.MindMapDrawer;
 import com.gmail.at.ivanehreshi.customui.NodeView;
+import com.gmail.at.ivanehreshi.models.NodeModel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 public class NodeViewController extends MouseAdapter{
     Point lastPosition = null;
@@ -20,6 +25,10 @@ public class NodeViewController extends MouseAdapter{
 
     @Override
     public void mouseDragged(MouseEvent e) {
+        if(SwingUtilities.isRightMouseButton(e)) {
+            return;
+        }
+
         if(lastPosition == null) {
             lastPosition = e.getPoint();
         }
@@ -29,6 +38,12 @@ public class NodeViewController extends MouseAdapter{
 
         getNodeView(e).translate(dx, dy);
     }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        getMmd(getNodeView(e)).getPositionTracker().startTracking();
+    }
+
 
     // TODO: only right button
     @Override
@@ -54,6 +69,18 @@ public class NodeViewController extends MouseAdapter{
     @Override
     public void mouseReleased(MouseEvent e) {
         lastPosition = null;
+
+        MindMapDrawer mmd = getMmd(getNodeView(e));
+        mmd.getPositionTracker().stopTracking();
+
+        if(!mmd.getPositionTracker().isEmpty()) {
+            MindMapApplication.getUndoManagerInstance().push(
+                    mmd.getPositionTracker().getUndoableCommand()
+            );
+        }
+
+        mmd.getPositionTracker().clear();
+
     }
 
     private final EditNodeTitle editNodeTitleAction = new EditNodeTitle();
@@ -61,7 +88,13 @@ public class NodeViewController extends MouseAdapter{
         JTextField field = (JTextField) e.getSource();
         NodeView view = (NodeView) field.getParent();
 
-        editNodeTitleAction.actionPerformed(new ActionEvent(view, 0, ""));
+        if(!view.getEditorText().equals(view.getModel().getTitle())) {
+            editNodeTitleAction.actionPerformed(new ActionEvent(view, 0, ""));
+        }
 //        view.getModel().setTitle(field.getText());
+    }
+
+    protected MindMapDrawer getMmd(NodeView view) {
+        return (MindMapDrawer) view.getMindMapController();
     }
 }

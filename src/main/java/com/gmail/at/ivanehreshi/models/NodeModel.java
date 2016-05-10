@@ -1,6 +1,7 @@
 package com.gmail.at.ivanehreshi.models;
 
 import com.gmail.at.ivanehreshi.customui.NodeStylesheet;
+import com.gmail.at.ivanehreshi.customui.NodeView;
 import com.gmail.at.ivanehreshi.utils.ConcatIter;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -51,8 +52,10 @@ public class NodeModel implements Iterable<NodeModel>{
         FontRenderContext frc = new FontRenderContext(affinetransform,true,true);
         int textwidth = (int)(getCachedFont().getStringBounds(title, frc).getWidth());
         int textheight = (int)(getCachedFont().getStringBounds(title, frc).getHeight());
-        this.height = Math.max(textheight + computeTotalInset()*2, getProps().getMinimumHeight());
-        this.width = Math.max(textwidth*3/2, getProps().getMinimumWidth());
+        this.height = Math.max(textheight + computeTotalInset()*3 + NodeView.BORDER_THICKNESS,
+                               getProps().getMinimumHeight());
+        this.width = Math.max(textwidth*3/2 + 3*NodeView.BORDER_THICKNESS,
+                               getProps().getMinimumWidth());
     }
 
     public Font cacheFont() {
@@ -193,7 +196,10 @@ public class NodeModel implements Iterable<NodeModel>{
         int correction = lowest.getBottom() - highest.getY();
         if(correction > 0) {
             upBranch.translateUpperNodes(0, -correction);
-            upBranch.getParent().firstModel(side).fixUp(side);
+            NodeModel firstModel = upBranch.getParent().firstModel(side);
+            if(firstModel != null) {
+                firstModel.fixUp(side);
+            }
         }
 
         return this;
@@ -210,7 +216,10 @@ public class NodeModel implements Iterable<NodeModel>{
         int correction = lowest.getBottom() - highest.getY();
         if(correction > 0) {
             nextBranch.translateLowerNodes(0, correction);
-            nextBranch.getParent().lastModel(side).fixDown(side);
+            NodeModel lastModel = nextBranch.getParent().lastModel(side);
+            if(lastModel != null) {
+                lastModel.fixDown(side);
+            }
         }
 
         return this;

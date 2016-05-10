@@ -17,6 +17,7 @@ import java.util.ArrayList;
 
 public class NodeViewController extends MouseAdapter{
     Point lastPosition = null;
+    boolean ignoreEvents = false;
 
     public NodeView getNodeView(MouseEvent e) {
         NodeView nodeView = (NodeView) e.getSource();
@@ -25,6 +26,10 @@ public class NodeViewController extends MouseAdapter{
 
     @Override
     public void mouseDragged(MouseEvent e) {
+        if(ignoreEvents) {
+            return;
+        }
+
         if(SwingUtilities.isRightMouseButton(e)) {
             return;
         }
@@ -32,6 +37,8 @@ public class NodeViewController extends MouseAdapter{
         if(lastPosition == null) {
             lastPosition = e.getPoint();
         }
+
+
 
         int dx = e.getX() - lastPosition.x;
         int dy = e.getY() - lastPosition.y;
@@ -41,6 +48,12 @@ public class NodeViewController extends MouseAdapter{
 
     @Override
     public void mousePressed(MouseEvent e) {
+        if(!getNodeView(e).activeArea().contains(e.getPoint())) {
+            ignoreEvents = true;
+            return;
+        }
+        ignoreEvents = false;
+
         getMmd(getNodeView(e)).getPositionTracker().startTracking();
     }
 
@@ -48,6 +61,9 @@ public class NodeViewController extends MouseAdapter{
     // TODO: only right button
     @Override
     public void mouseClicked(MouseEvent e) {
+        if(ignoreEvents) {
+            return;
+        }
         NodeView view = getNodeView(e);
 
         if(e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
@@ -68,6 +84,9 @@ public class NodeViewController extends MouseAdapter{
 
     @Override
     public void mouseReleased(MouseEvent e) {
+        if(ignoreEvents) {
+            return;
+        }
         lastPosition = null;
 
         MindMapDrawer mmd = getMmd(getNodeView(e));

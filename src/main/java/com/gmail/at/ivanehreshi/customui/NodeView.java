@@ -2,9 +2,13 @@ package com.gmail.at.ivanehreshi.customui;
 
 import com.gmail.at.ivanehreshi.customui.controllers.MindMapController;
 import com.gmail.at.ivanehreshi.customui.controllers.NodeViewController;
+import com.gmail.at.ivanehreshi.customui.controllers.ResizeController;
 import com.gmail.at.ivanehreshi.models.NodeModel;
+import com.gmail.at.ivanehreshi.utils.Selectable;
 
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,13 +16,15 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.geom.Rectangle2D;
 
-public class NodeView extends JPanel {
+public class NodeView extends JPanel implements Selectable{
     private MindMapController mindMapController;
     protected NodeModel model;
     private boolean selected = false;
     private JTextField editor;
     private State state;
     private NodeViewController nodeViewController;
+
+    public static final int BORDER_THICKNESS = 6;
 
     @Deprecated
     public NodeView(boolean dummy) {
@@ -27,6 +33,8 @@ public class NodeView extends JPanel {
 
     private NodeView() {
         state = State.STATIC;
+
+        setBorder(new ResizableBorder(BORDER_THICKNESS, Color.GREEN, Color.GRAY));
 
         setOpaque(false);
 
@@ -44,10 +52,21 @@ public class NodeView extends JPanel {
         editor.setBackground(new Color(215, 223, 223, 150));
     }
 
+    public Rectangle activeArea() {
+        Insets insets = getInsets();
+        return new Rectangle(insets.left, insets.top,
+                            getWidth() - insets.left - insets.right,
+                            getHeight() - insets.top - insets.bottom);
+    }
+
     protected void setUpControllers() {
         nodeViewController = new NodeViewController();
         addMouseListener(nodeViewController);
         addMouseMotionListener(nodeViewController);
+
+        ResizeController resizeController = new ResizeController(6);
+        addMouseListener(resizeController);
+        addMouseMotionListener(resizeController);
 
         editor.addActionListener(new ActionListener() {
             @Override
@@ -102,8 +121,13 @@ public class NodeView extends JPanel {
         if(mindMapController != null) {
             mindMapController.onViewTranslate(this, dx, dy);
         }
-
         return this;
+    }
+
+    @Override
+    public void setSize(int width, int height) {
+        super.setSize(width, height);
+        getModel().setSize(getSize());
     }
 
     public void edit() {
@@ -151,14 +175,19 @@ public class NodeView extends JPanel {
             return;
         }
 
+        Insets insets = getInsets();
+
         int nodeThickness = getModel().getProps().getThickness();
-        int outerBorder = getModel().getProps().getOuterMargin();
+        int outerBorder   = getModel().getProps().getOuterMargin();
 
         g2d.setColor(getModel().getProps().getNodeColor());
 
         g2d.setStroke(new BasicStroke(nodeThickness));
-        g2d.drawRoundRect(outerBorder + nodeThickness/2, outerBorder + nodeThickness/2,
-                this.getWidth()-2*outerBorder - nodeThickness, this.getHeight()-2*outerBorder - nodeThickness, 10, 10);
+        g2d.drawRoundRect(insets.right + outerBorder + nodeThickness/2,
+                          insets.top + outerBorder + nodeThickness/2,
+                          getWidth()-2*outerBorder - nodeThickness - insets.left - insets.right,
+                          getHeight()-2*outerBorder - nodeThickness - insets.top - insets.left,
+                          10, 10);
 
         drawTitle(g2d);
 
@@ -240,6 +269,7 @@ public class NodeView extends JPanel {
         return this.getModel();
     }
 
+    @Override
     public boolean isSelected() {
         return selected;
     }
@@ -252,6 +282,7 @@ public class NodeView extends JPanel {
         }
     }
 
+    @Override
     public void setSelected(boolean selected) {
         setSelected(selected, false);
     }

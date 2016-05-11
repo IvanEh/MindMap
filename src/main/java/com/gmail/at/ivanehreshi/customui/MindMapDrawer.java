@@ -7,6 +7,7 @@ import com.gmail.at.ivanehreshi.customui.controllers.MindMapController;
 import com.gmail.at.ivanehreshi.customui.controllers.MindMapMoveController;
 import com.gmail.at.ivanehreshi.menu.NodeViewPopupBuilder;
 import com.gmail.at.ivanehreshi.models.NodeModel;
+import com.gmail.at.ivanehreshi.utils.HtmlDrawer;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;

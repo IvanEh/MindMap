@@ -5,6 +5,7 @@ import com.gmail.at.ivanehreshi.customui.controllers.MindMapController;
 import com.gmail.at.ivanehreshi.customui.controllers.NodeViewController;
 import com.gmail.at.ivanehreshi.customui.controllers.ResizeController;
 import com.gmail.at.ivanehreshi.models.NodeModel;
+import com.gmail.at.ivanehreshi.utils.HtmlDrawer;
 import com.gmail.at.ivanehreshi.utils.Selectable;
 import com.gmail.at.ivanehreshi.utils.Utilities;
 
@@ -182,14 +183,7 @@ public class NodeView extends JPanel implements Selectable{
         int nodeThickness = getModel().getProps().getThickness();
         int outerBorder   = getModel().getProps().getOuterMargin();
 
-        g2d.setColor(getModel().getProps().getNodeColor());
-
-        g2d.setStroke(new BasicStroke(nodeThickness));
-        g2d.drawRoundRect(insets.right + outerBorder + nodeThickness/2,
-                          insets.top + outerBorder + nodeThickness/2,
-                          getWidth()-2*outerBorder - nodeThickness - insets.left - insets.right,
-                          getHeight()-2*outerBorder - nodeThickness - insets.top - insets.left,
-                          10, 10);
+        drawBorder(g2d, insets, nodeThickness, outerBorder);
 
         if(getModel().isImage()) {
             drawImage(g2d);
@@ -202,6 +196,16 @@ public class NodeView extends JPanel implements Selectable{
             drawFocused(g2d);
         }
 
+    }
+
+    private void drawBorder(Graphics2D g2d, Insets insets, int nodeThickness, int outerBorder) {
+        g2d.setColor(getModel().getProps().getNodeColor());
+        g2d.setStroke(new BasicStroke(nodeThickness));
+        g2d.drawRoundRect(insets.right + nodeThickness/2,
+                          insets.top + nodeThickness/2,
+                          getWidth() - nodeThickness - insets.left - insets.right,
+                          getHeight() - nodeThickness - insets.top - insets.left,
+                          10, 10);
     }
 
     private void drawFocused(Graphics2D g2d) {
@@ -222,10 +226,13 @@ public class NodeView extends JPanel implements Selectable{
         g2d.drawLine(dx, getHeight()-thickness/2, width + dx, getHeight() - thickness/2);
     }
 
+    HtmlDrawer drawer = new HtmlDrawer();
     private void drawTitle(Graphics2D g2d) {
         if(state == State.STATIC) {
+//            Point textPosition = getAlignedTextPosition(g2d);
             Point textPosition = getAlignedTextPos(g2d);
-            g2d.drawString(this.model.getTitle(), textPosition.x, textPosition.y);
+//            g2d.drawString(this.model.getTitle(), textPosition.x, textPosition.y);
+            drawer.drawHtml(g2d, getModel().getTitle(), textPosition.x, textPosition.y);
         }
     }
 
@@ -244,6 +251,7 @@ public class NodeView extends JPanel implements Selectable{
         g2d.drawImage(bufferedImage, activeArea.x, activeArea.y, null);
     }
 
+    @Deprecated
     private Point getAlignedTextPos(Graphics2D g2d) {
         Rectangle2D textArea = getTextArea();
         Rectangle2D bounds = g2d.getFontMetrics().getStringBounds(model.getTitle(), g2d);
@@ -257,8 +265,26 @@ public class NodeView extends JPanel implements Selectable{
         return new Point((int) x, (int)y);
     }
 
+    // TODO: cache value
+    @Deprecated
+    private Point getAlignedTextPosition(Graphics2D g2d) {
+        Rectangle2D textArea = getTextArea();
+        Dimension dim = drawer.computeTextSize(getModel().getTitle());
+
+        // TODO: test this one
+        if(dim.getHeight() > textArea.getHeight()) {
+            textArea = getMaximumTextArea();
+        }
+
+        double x, y;
+        x = textArea.getX() + (textArea.getWidth() - dim.getWidth())/2;
+        y = textArea.getY() + (textArea.getHeight() - dim.getHeight())/2;
+        y = y + dim.getHeight();
+        return new Point((int) x, (int)y);
+    }
+
     private Rectangle2D getTextArea() {
-        double x = getModel().getProps().getOuterMargin() + getModel().getProps().getThickness() + getModel().getProps().getInnerMargin();
+        double x = getModel().getProps().getThickness() + getModel().getProps().getInnerMargin();
         double y = x;
         double width = this.getWidth() - 2*x;
         double height = this.getHeight() - 2*y;

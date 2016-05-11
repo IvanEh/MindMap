@@ -229,8 +229,9 @@ public class NodeView extends JPanel implements Selectable{
     HtmlDrawer drawer = new HtmlDrawer();
     private void drawTitle(Graphics2D g2d) {
         if(state == State.STATIC) {
-//            Point textPosition = getAlignedTextPosition(g2d);
-            Point textPosition = getAlignedTextPos(g2d);
+            // TODO: malicious
+            Point textPosition = getAlignedTextPosition(g2d);
+//            Point textPosition = getAlignedTextPos(g2d);
 //            g2d.drawString(this.model.getTitle(), textPosition.x, textPosition.y);
             drawer.drawHtml(g2d, getModel().getTitle(), textPosition.x, textPosition.y);
         }

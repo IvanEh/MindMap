@@ -103,7 +103,7 @@ public class NodeViewController extends MouseAdapter{
 
     private final EditNodeTitle editNodeTitleAction = new EditNodeTitle();
     public void onEditAction(ActionEvent e) {
-        JTextField field = (JTextField) e.getSource();
+        JEditorPane field = (JEditorPane) e.getSource();
         NodeView view = (NodeView) field.getParent();
 
         if(!view.getEditorText().equals(view.getModel().getTitle())) {

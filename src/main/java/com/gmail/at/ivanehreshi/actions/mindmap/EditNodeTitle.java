@@ -27,7 +27,7 @@ public class EditNodeTitle extends YAction {
 
         return new UndoableCommand() {
             final String unchanged = view.getModel().getTitle();
-            final String changed   = view.getEditorText();
+            final String changed   = view.getEditorText().replace("\n", "<br/>");
             UndoableCommand positionChange = null;
 
             @Override

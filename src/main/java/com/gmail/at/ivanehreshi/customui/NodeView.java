@@ -23,7 +23,7 @@ public class NodeView extends JPanel implements Selectable{
     private MindMapController mindMapController;
     protected NodeModel model;
     private boolean selected = false;
-    private JTextField editor;
+    private JEditorPane editor;
     private State state;
     private NodeViewController nodeViewController;
     private BufferedImage cachedImage = null;
@@ -48,7 +48,7 @@ public class NodeView extends JPanel implements Selectable{
     }
 
     private void initGui() {
-        editor = new JTextField();
+        editor = new JEditorPane();
         add(editor);
         editor.setVisible(false);
         editor.setBorder(null);
@@ -72,13 +72,13 @@ public class NodeView extends JPanel implements Selectable{
         addMouseListener(resizeController);
         addMouseMotionListener(resizeController);
 
-        editor.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                nodeViewController.onEditAction(e);
-                finishEditing();
-            }
-        });
+//        editor.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                nodeViewController.onEditAction(e);
+//                finishEditing();
+//            }
+//        });
 
         editor.addFocusListener(new FocusListener() {
             @Override
@@ -137,7 +137,7 @@ public class NodeView extends JPanel implements Selectable{
     public void edit() {
         editor.setVisible(true);
         editor.grabFocus();
-        editor.setText(getModel().getTitle());
+        editor.setText(getModel().getTitle().replace("<br/>", "\n"));
         Rectangle2D textArea = getTextArea();
 
         editor.setBounds((int) textArea.getX(), (int)textArea.getY(),

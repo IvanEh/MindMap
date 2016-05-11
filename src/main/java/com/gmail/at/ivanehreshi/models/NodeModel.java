@@ -18,6 +18,7 @@ import java.util.Stack;
 public class NodeModel implements Iterable<NodeModel>{
     private String title;
     private String content;
+    private String imagePath;
 
     @Deprecated
     private ArrayList<NodeModel> leftNodes;
@@ -35,6 +36,7 @@ public class NodeModel implements Iterable<NodeModel>{
     public NodeModel(String title, NodeSide side) {
         this.title = title;
         this.content = "";
+        this.imagePath = null;
         leftNodes = new ArrayList<>();
         rightNodes = new ArrayList<>();
         nodeSide = side;
@@ -203,6 +205,10 @@ public class NodeModel implements Iterable<NodeModel>{
         }
 
         return this;
+    }
+
+    public boolean isImage() {
+        return imagePath != null;
     }
 
     public NodeModel fixDown(NodeSide side) {
@@ -685,6 +691,14 @@ public class NodeModel implements Iterable<NodeModel>{
     public void setSize(Dimension size) {
         this.width = (int) size.getWidth();
         this.height = (int) size.getHeight();
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 
     public interface BeforeChangeListener {

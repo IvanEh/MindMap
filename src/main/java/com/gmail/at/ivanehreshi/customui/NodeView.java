@@ -1,20 +1,21 @@
 package com.gmail.at.ivanehreshi.customui;
 
+import com.gmail.at.ivanehreshi.MindMapApplication;
 import com.gmail.at.ivanehreshi.customui.controllers.MindMapController;
 import com.gmail.at.ivanehreshi.customui.controllers.NodeViewController;
 import com.gmail.at.ivanehreshi.customui.controllers.ResizeController;
 import com.gmail.at.ivanehreshi.models.NodeModel;
 import com.gmail.at.ivanehreshi.utils.Selectable;
+import com.gmail.at.ivanehreshi.utils.Utilities;
 
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 
 public class NodeView extends JPanel implements Selectable{
     private MindMapController mindMapController;
@@ -23,6 +24,7 @@ public class NodeView extends JPanel implements Selectable{
     private JTextField editor;
     private State state;
     private NodeViewController nodeViewController;
+    private BufferedImage cachedImage = null;
 
     public static final int BORDER_THICKNESS = 6;
 
@@ -189,7 +191,11 @@ public class NodeView extends JPanel implements Selectable{
                           getHeight()-2*outerBorder - nodeThickness - insets.top - insets.left,
                           10, 10);
 
-        drawTitle(g2d);
+        if(getModel().isImage()) {
+            drawImage(g2d);
+        } else {
+            drawTitle(g2d);
+        }
 
 
         if(isSelected()) {
@@ -221,6 +227,21 @@ public class NodeView extends JPanel implements Selectable{
             Point textPosition = getAlignedTextPos(g2d);
             g2d.drawString(this.model.getTitle(), textPosition.x, textPosition.y);
         }
+    }
+
+    private void drawImage(Graphics2D g2d) {
+
+        BufferedImage bufferedImage;
+        Rectangle activeArea = activeArea();
+
+        if(cachedImage != null) {
+            bufferedImage = cachedImage;
+        } else {
+            bufferedImage = MindMapApplication.getInstance().getResources()
+                    .getImage(getModel().getImagePath(), true);
+        }
+
+        g2d.drawImage(bufferedImage, activeArea.x, activeArea.y, null);
     }
 
     private Point getAlignedTextPos(Graphics2D g2d) {
@@ -267,6 +288,19 @@ public class NodeView extends JPanel implements Selectable{
             return mindMapController.onViewRemove(this);
         }
         return this.getModel();
+    }
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        if(getModel() != null && getModel().isImage()) {
+            BufferedImage bufferedImage = MindMapApplication.getInstance().
+                    getResources().getImage(getModel().getImagePath(), false);
+            if(bufferedImage != null) {
+                Rectangle activeArea = activeArea();
+                cachedImage = Utilities.resize(bufferedImage, activeArea.width, activeArea.height);
+            }
+        }
     }
 
     @Override

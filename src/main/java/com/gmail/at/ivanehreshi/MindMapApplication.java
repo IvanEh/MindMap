@@ -2,6 +2,7 @@ package com.gmail.at.ivanehreshi;
 
 import com.gmail.at.ivanehreshi.menu.MenuBarBuilder;
 import com.gmail.at.ivanehreshi.panels.RootLayoutPanel;
+import com.gmail.at.ivanehreshi.utils.Resources;
 import com.gmail.at.ivanehreshi.utils.UndoManager;
 
 import javax.swing.*;
@@ -18,15 +19,23 @@ public class MindMapApplication extends JFrame {
 
     public JMenuBar menuBar;
     public JPanel rootLayoutPanel;
+    private Resources resources;
 
     private MindMapApplication() {
         super(FRAME_TITLE);
+
+        this.resources = new Resources();
+
         // TODO: replace setSize with pack()
         this.setSize(WINDOW_SIZE);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null); // center window
 
         initGui();
+    }
+
+    public Resources getResources() {
+        return resources;
     }
 
     public static UndoManager getUndoManagerInstance() {

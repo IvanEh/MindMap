@@ -1,7 +1,10 @@
 package com.gmail.at.ivanehreshi.panels.workspace;
 
+import com.gmail.at.ivanehreshi.MindMapApplication;
+import com.gmail.at.ivanehreshi.actions.mindmap.AddNode;
 import com.gmail.at.ivanehreshi.customui.MindMapDrawer;
 import com.gmail.at.ivanehreshi.customui.NodeView;
+import com.gmail.at.ivanehreshi.customui.controllers.MindMapMoveController;
 import com.gmail.at.ivanehreshi.models.NodeModel;
 
 import javax.swing.*;
@@ -22,7 +25,7 @@ public class Workspace extends JPanel {
 
     private void initDebugGui() {
         this.setLayout(new BorderLayout());
-        NodeModel model = new NodeModel("Root", NodeModel.NodeSide.RIGHT);
+        NodeModel model = new NodeModel("Root", NodeModel.NodeSide.ROOT);
 
         mindMapDrawer = new MindMapDrawer(model);
 
@@ -30,43 +33,44 @@ public class Workspace extends JPanel {
         mindMapDrawer.setVisible(true);
         mindMapDrawer.doLayout();
         NodeView root = mindMapDrawer.getRootNodeView();
-        NodeView first = root.insertNode(" 1 ");
-        NodeView second = root.insertNode(" 2 ");
-        NodeView a = first.insertNode(" A ");
-        a.insertNode("dummy");
-        NodeView b = first.insertNode(" B ");
-        NodeView c = first.insertNode(" C ");
-        NodeView d = first.insertNode(" D ");
+        NodeView first = root.insertNewNode(" 1 ");
+        NodeView second = root.insertNewNode(" 2 ");
+        NodeView third = root.insertNewNode(" 3 ");
+        NodeView a = first.insertNewNode(" A ");
+        a.insertNewNode("dummy");
+        NodeView b = first.insertNewNode(" B\nHy ");
+        NodeView c = first.insertNewNode(" C ");
+        NodeView d = first.insertNewNode(" D ");
 //
-        NodeView target1 = b.insertNode(" target 1");
-        NodeView target2 = b.insertNode("target 2");
-        NodeView target3 = b.insertNode("target 3");
+        NodeView target1 = b.insertNewNode(" target 1");
+        NodeView target2 = b.insertNewNode("target 2");
+        NodeView target3 = b.insertNewNode("target 3");
 
-        NodeView o = c.insertNode("OOO");
+        NodeView o = c.insertNewNode("OOO");
 
-        NodeView x = second.insertNode(" X ");
-        NodeView y = second.insertNode(" Y ");
-        NodeView z = second.insertNode(" Z ");
+        NodeView x = second.insertNewNode(" X ");
+        NodeView y = second.insertNewNode(" Y ");
+        NodeView z = second.insertNewNode(" Z ");
+        z.getModel().setImagePath("/home/ivaneh/plus.png");
 
         trView = d;
 //
         mindMapDrawer.doLayout();
-        a.getModel().swapDown();
+//        a.getModel().swapDown();
         time = System.currentTimeMillis();
-        Timer timer = new Timer(300, new ActionListener() {
+        Timer timer = new Timer(4000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 test();
             }
         });
-//        timer.start();
+        timer.start();
 
     }
 
     public void test() {
         long delta = System.currentTimeMillis()-time;
-        trView.translate(0, (int) 2);
-        trView.getModel().swapUp();
+//        MindMapApplication.getUndoManagerInstance().undo();
         time = System.currentTimeMillis();
     }
 

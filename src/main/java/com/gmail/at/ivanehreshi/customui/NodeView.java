@@ -185,7 +185,7 @@ public class NodeView extends JPanel implements Selectable{
 
         drawBorder(g2d, insets, nodeThickness, outerBorder);
 
-        if(getModel().isImage()) {
+        if(getModel().isImageNode()) {
             drawImage(g2d);
         } else {
             drawTitle(g2d);
@@ -320,7 +320,7 @@ public class NodeView extends JPanel implements Selectable{
     @Override
     public void invalidate() {
         super.invalidate();
-        if(getModel() != null && getModel().isImage()) {
+        if(getModel() != null && getModel().isImageNode()) {
             BufferedImage bufferedImage = MindMapApplication.getInstance().
                     getResources().getImage(getModel().getImagePath(), false);
             if(bufferedImage != null) {

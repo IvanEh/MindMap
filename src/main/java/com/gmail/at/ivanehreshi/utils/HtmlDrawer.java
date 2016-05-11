@@ -20,14 +20,10 @@ public class HtmlDrawer {
     }
 
     public Dimension computeTextSize(String text) {
-        label.setText(text);
+        label.setText("<html><font size=12pt>" + text + "</font></html>");
         return label.getPreferredSize();
     }
 
-    public Dimension preferredSize(String text) {
-        label.setText(text);
-        return label.getPreferredSize();
-    }
 
 
 }

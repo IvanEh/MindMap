@@ -225,7 +225,9 @@ public class MindMapDrawer extends JPanel implements MindMapController {
         int oldHeight = model.getHeight();
 
         // TODO: move to onModelChangeSize
-        model.updateModelPreferredSize();
+        if(model.isAutoResizeEnabled()) {
+            model.updateModelPreferredSize();
+        }
         int dw = (int) (model.getWidth() - oldWidth);
         int dh = (int) (model.getHeight() - oldHeight);
 

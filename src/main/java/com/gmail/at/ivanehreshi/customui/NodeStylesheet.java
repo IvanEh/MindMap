@@ -18,6 +18,7 @@ public class NodeStylesheet extends Stylesheet{
         put(NODE_COLOR, new Color(84, 51, 116));
         put(THICKNESS, 3);
         put(OUTER_MARGIN, 0);
+        // TODO: inner top and left margin
         put(INNER_MARGIN, 3);
         put(FONT_SIZE, 12);
         put(MINIMUM_GAP, 5);

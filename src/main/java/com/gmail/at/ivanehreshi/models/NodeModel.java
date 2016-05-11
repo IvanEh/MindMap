@@ -1,15 +1,17 @@
 package com.gmail.at.ivanehreshi.models;
 
+import com.gmail.at.ivanehreshi.MindMapApplication;
 import com.gmail.at.ivanehreshi.customui.NodeStylesheet;
 import com.gmail.at.ivanehreshi.customui.NodeView;
 import com.gmail.at.ivanehreshi.utils.ConcatIter;
+import com.gmail.at.ivanehreshi.utils.Utilities;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.event.ChangeListener;
-import javax.xml.soap.Node;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -31,6 +33,7 @@ public class NodeModel implements Iterable<NodeModel>{
     private Point pos;
     private int height = 20;
     private int width = 50;
+    private boolean autoResize = true;
     private Font cachedFont;
 
     public NodeModel(String title, NodeSide side) {
@@ -49,16 +52,31 @@ public class NodeModel implements Iterable<NodeModel>{
         updateModelPreferredSize();
     }
 
+
     public void updateModelPreferredSize() {
-        AffineTransform affinetransform = getCachedFont().getTransform();
-        FontRenderContext frc = new FontRenderContext(affinetransform,true,true);
-        int textwidth = (int)(getCachedFont().getStringBounds(title, frc).getWidth());
-        int textheight = (int)(getCachedFont().getStringBounds(title, frc).getHeight());
-        this.height = Math.max(textheight + computeTotalInset()*3 + NodeView.BORDER_THICKNESS,
-                               getProps().getMinimumHeight());
-        this.width = Math.max(textwidth*3/2 + 3*NodeView.BORDER_THICKNESS,
-                               getProps().getMinimumWidth());
+        if(isTextNode()) {
+//            AffineTransform affinetransform = getCachedFont().getTransform();
+//            FontRenderContext frc = new FontRenderContext(affinetransform, true, true);
+//            int textwidth = (int) (getCachedFont().getStringBounds(title, frc).getWidth());
+//            int textheight = (int) (getCachedFont().getStringBounds(title, frc).getHeight());
+//            this.height = Math.max(textheight + computeTotalInset() * 3 + NodeView.BORDER_THICKNESS,
+//                    getProps().getMinimumHeight());
+//            this.width = Math.max(textwidth * 3 / 2 + 3 * NodeView.BORDER_THICKNESS,
+//                    getProps().getMinimumWidth());
+            int border = computeTotalInset() + NodeView.BORDER_THICKNESS;
+            border *= 2;
+
+            Dimension dim = Utilities.getHtmlDrawer().computeTextSize(getTitle());
+            setSize(dim.width + border, dim.height + border);
+
+        } else {
+            BufferedImage image = MindMapApplication.getInstance().getResources()
+                        .getImage(getImagePath(), false);
+            setSize(new Dimension(image.getWidth(), image.getHeight()));
+        }
     }
+
+
 
     public Font cacheFont() {
         if(cachedFont == null) {
@@ -207,7 +225,7 @@ public class NodeModel implements Iterable<NodeModel>{
         return this;
     }
 
-    public boolean isImage() {
+    public boolean isImageNode() {
         return imagePath != null;
     }
 
@@ -444,7 +462,11 @@ public class NodeModel implements Iterable<NodeModel>{
     }
 
     public void setNodePos(Point nodePos) {
+        fireBeforeChangeEvent();
+
         this.pos = new Point(nodePos);
+
+        fireChangeEvent(new ChangeEvent(this, ChangeEvent.Cause.BOUNDS, null));
     }
 
     public boolean isRootNode() {
@@ -551,7 +573,6 @@ public class NodeModel implements Iterable<NodeModel>{
 
         model = model.prevNode();
         NodeModel lowest = null;
-        // TODO: has childs redendant
         while (model != null) {
 
             if(model.getBottom() > this.getMutNodePos().getY()) { // TODO: opt memory - cache pos
@@ -688,9 +709,21 @@ public class NodeModel implements Iterable<NodeModel>{
         return new Dimension(width, height);
     }
 
+    public void setSize(int width, int height) {
+        this.width = (int) width;
+        this.height = (int) height;
+    }
+
     public void setSize(Dimension size) {
-        this.width = (int) size.getWidth();
-        this.height = (int) size.getHeight();
+        setSize((int) size.getWidth(), (int) size.getHeight());
+    }
+
+    public boolean isAutoResizeEnabled() {
+        return autoResize;
+    }
+
+    public void setAutoResize(boolean autoResize) {
+        this.autoResize = autoResize;
     }
 
     public String getImagePath() {
@@ -699,6 +732,10 @@ public class NodeModel implements Iterable<NodeModel>{
 
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
+    }
+
+    public boolean isTextNode() {
+        return !isImageNode();
     }
 
     public interface BeforeChangeListener {

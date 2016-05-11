@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class Utilities {
+    private static final HtmlDrawer htmlDrawer = new HtmlDrawer();
+
     public static BufferedImage resize(BufferedImage image, int width, int height) {
         BufferedImage bi = new BufferedImage(width, height, BufferedImage.TRANSLUCENT);
         Graphics2D g2d = (Graphics2D) bi.createGraphics();
@@ -11,5 +13,9 @@ public class Utilities {
         g2d.drawImage(image, 0, 0, width, height, null);
         g2d.dispose();
         return bi;
+    }
+
+    public static HtmlDrawer getHtmlDrawer() {
+        return htmlDrawer;
     }
 }

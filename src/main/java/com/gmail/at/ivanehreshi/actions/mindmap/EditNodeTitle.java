@@ -15,8 +15,14 @@ import java.awt.event.ActionEvent;
  * ActionEvent source expected to be a NodeView
  */
 public class EditNodeTitle extends YAction {
-    public EditNodeTitle() {
+    private final String before;
+    private final String after;
+
+    public EditNodeTitle(String before, String after) {
         super("Edit node");
+
+        this.before = before;
+        this.after = after;
     }
 
     @Override
@@ -26,16 +32,17 @@ public class EditNodeTitle extends YAction {
                 ((MindMapDrawer)view.getMindMapController()).getPositionTracker();
 
         return new UndoableCommand() {
-            final String unchanged = view.getModel().getTitle();
-            final String changed   = view.getEditorText().replace("\n", "<br/>");
             UndoableCommand positionChange = null;
 
             @Override
             public void undo() {
-                view.getModel().setTitle(unchanged);
+                view.getModel().setTitle(before);
                 if(positionChange != null) {
                     positionChange.undo();
                 }
+
+                view.validate();
+                view.repaint();
             }
 
             @Override
@@ -45,7 +52,7 @@ public class EditNodeTitle extends YAction {
                     tracker.startTracking();
                 }
 
-                view.getModel().setTitle(changed);
+                view.getModel().setTitle(after);
 
                 if(positionChange == null) {
                     tracker.stopTracking();
@@ -54,6 +61,9 @@ public class EditNodeTitle extends YAction {
                 } else {
                     positionChange.redo();
                 }
+
+                // TODO: replace with appropriate controller or lazy layout()
+                view.getParent().doLayout();
             }
         };
     }

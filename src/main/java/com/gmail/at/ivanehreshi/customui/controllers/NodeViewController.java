@@ -65,9 +65,10 @@ public class NodeViewController extends MouseAdapter{
             return;
         }
         NodeView view = getNodeView(e);
+        view.requestFocus();
 
         if(e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
-            view.edit();
+            getMmd(view).getNodeEditor().edit(view);
         }
         if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 1){
             if((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK) {
@@ -99,17 +100,6 @@ public class NodeViewController extends MouseAdapter{
 
         mmd.getPositionTracker().clear();
 
-    }
-
-    private final EditNodeTitle editNodeTitleAction = new EditNodeTitle();
-    public void onEditAction(ActionEvent e) {
-        JEditorPane field = (JEditorPane) e.getSource();
-        NodeView view = (NodeView) field.getParent();
-
-        if(!view.getEditorText().equals(view.getModel().getTitle())) {
-            editNodeTitleAction.actionPerformed(new ActionEvent(view, 0, ""));
-        }
-//        view.getModel().setTitle(field.getText());
     }
 
     protected MindMapDrawer getMmd(NodeView view) {

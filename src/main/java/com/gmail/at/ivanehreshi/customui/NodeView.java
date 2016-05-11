@@ -23,7 +23,6 @@ public class NodeView extends JPanel implements Selectable{
     private MindMapController mindMapController;
     protected NodeModel model;
     private boolean selected = false;
-    private JEditorPane editor;
     private State state;
     private NodeViewController nodeViewController;
     private BufferedImage cachedImage = null;
@@ -39,7 +38,7 @@ public class NodeView extends JPanel implements Selectable{
         state = State.STATIC;
 
         setBorder(new ResizableBorder(BORDER_THICKNESS, Color.GREEN, Color.GRAY));
-
+        setFocusable(true);
         setOpaque(false);
 
         initGui();
@@ -48,12 +47,6 @@ public class NodeView extends JPanel implements Selectable{
     }
 
     private void initGui() {
-        editor = new JEditorPane();
-        add(editor);
-        editor.setVisible(false);
-        editor.setBorder(null);
-        editor.setOpaque(true);
-        editor.setBackground(new Color(215, 223, 223, 150));
     }
 
     public Rectangle activeArea() {
@@ -72,24 +65,6 @@ public class NodeView extends JPanel implements Selectable{
         addMouseListener(resizeController);
         addMouseMotionListener(resizeController);
 
-//        editor.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                nodeViewController.onEditAction(e);
-//                finishEditing();
-//            }
-//        });
-
-        editor.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) { }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                nodeViewController.onEditAction(new ActionEvent(editor, 0, ""));
-                finishEditing();
-            }
-        });
     }
 
     public NodeView(NodeModel model, MindMapController mindMapController) {
@@ -132,24 +107,6 @@ public class NodeView extends JPanel implements Selectable{
     public void setSize(int width, int height) {
         super.setSize(width, height);
         getModel().setSize(getSize());
-    }
-
-    public void edit() {
-        editor.setVisible(true);
-        editor.grabFocus();
-        editor.setText(getModel().getTitle().replace("<br/>", "\n"));
-        Rectangle2D textArea = getTextArea();
-
-        editor.setBounds((int) textArea.getX(), (int)textArea.getY(),
-                (int)textArea.getWidth(), (int)textArea.getHeight());
-        this.state = State.EDIT;
-    }
-
-    public void finishEditing() {
-        if(state == State.EDIT) {
-            state = State.STATIC;
-            editor.setVisible(false);
-        }
     }
 
     @Deprecated
@@ -238,6 +195,14 @@ public class NodeView extends JPanel implements Selectable{
         }
     }
 
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
     private void drawImage(Graphics2D g2d) {
 
         BufferedImage bufferedImage;
@@ -269,7 +234,7 @@ public class NodeView extends JPanel implements Selectable{
 
     // TODO: cache value
     @Deprecated
-    private Point getAlignedTextPosition(Graphics2D g2d) {
+    public Point getAlignedTextPosition(Graphics2D g2d) {
         Rectangle2D textArea = getTextArea();
         Dimension dim = drawer.computeTextSize(getModel().getFormattedTitle());
 
@@ -285,12 +250,12 @@ public class NodeView extends JPanel implements Selectable{
         return new Point((int) x, (int)y);
     }
 
-    private Rectangle2D getTextArea() {
-        double x = getModel().getProps().getThickness() + getModel().getProps().getInnerMargin();
-        double y = x;
-        double width = this.getWidth() - 2*x;
-        double height = this.getHeight() - 2*y;
-        return new Rectangle2D.Double(x, y, width, height);
+    public Rectangle getTextArea() {
+        int x = getModel().getProps().getThickness() + getModel().getProps().getInnerMargin();
+        int y = x;
+        int width = this.getWidth() - 2*x;
+        int height = this.getHeight() - 2*y;
+        return new Rectangle(x, y, width, height);
     }
 
     public Rectangle2D getMaximumTextArea() {
@@ -360,10 +325,6 @@ public class NodeView extends JPanel implements Selectable{
     @Override
     public String toString() {
         return "view( " + getModel() + ") at + getLocation()" ;
-    }
-
-    public String getEditorText() {
-        return editor.getText();
     }
 
     enum State {

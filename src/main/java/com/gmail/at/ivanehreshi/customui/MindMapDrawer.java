@@ -1,13 +1,10 @@
 package com.gmail.at.ivanehreshi.customui;
 
-import com.gmail.at.ivanehreshi.MindMapApplication;
-import com.gmail.at.ivanehreshi.actions.UndoableCommand;
 import com.gmail.at.ivanehreshi.customui.controllers.ChangesTracker;
 import com.gmail.at.ivanehreshi.customui.controllers.MindMapController;
 import com.gmail.at.ivanehreshi.customui.controllers.MindMapMoveController;
 import com.gmail.at.ivanehreshi.menu.NodeViewPopupBuilder;
 import com.gmail.at.ivanehreshi.models.NodeModel;
-import com.gmail.at.ivanehreshi.utils.HtmlDrawer;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -17,11 +14,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class MindMapDrawer extends JPanel implements MindMapController {
     Map<NodeModel, NodeView> modelToViewMap = new HashMap<>();
@@ -33,7 +26,7 @@ public class MindMapDrawer extends JPanel implements MindMapController {
     private ArrayList<NodeView> selectedNodes = new ArrayList<>();
     private ChangesTracker<Point> positionTracker;
     private ChangesTracker<Dimension> dimensionTracker;
-
+    private LightWeightNodeEditor nodeEditor;
 
     public MindMapDrawer(NodeModel rootModel) {
         setOpaque(false);
@@ -82,7 +75,9 @@ public class MindMapDrawer extends JPanel implements MindMapController {
     }
 
     private void createGui() {
-
+        nodeEditor = new LightWeightNodeEditor(null);
+        add(nodeEditor);
+        nodeEditor.setVisible(false);
     }
 
     public MindMapLayout getMindMapLayout() {
@@ -169,6 +164,10 @@ public class MindMapDrawer extends JPanel implements MindMapController {
 
     protected Map<NodeModel, NodeView> getModelToViewMap() {
         return modelToViewMap;
+    }
+
+    public LightWeightNodeEditor getNodeEditor() {
+        return nodeEditor;
     }
 
     /**

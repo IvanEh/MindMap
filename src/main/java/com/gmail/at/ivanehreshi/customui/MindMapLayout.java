@@ -46,6 +46,11 @@ public class MindMapLayout implements LayoutManager {
             int y = (int) (origin.getY() +  nodePos.getY()) ;
             nodeView.setLocation(x, y);
             nodeView.setSize(nodeView.getMinimumSize());
+        } else if (comp instanceof LightWeightNodeEditor) {
+            LightWeightNodeEditor nodeEditor = (LightWeightNodeEditor) comp;
+            // TODO: remove magic numbers
+            int width = (int) Math.max(Math.min(100, nodeEditor.getMinimumSize().getWidth()), nodeEditor.getWidth());
+            nodeEditor.setSize(width, (int) nodeEditor.getPreferredSize().getHeight());
         }
     }
 

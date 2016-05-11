@@ -234,7 +234,7 @@ public class NodeView extends JPanel implements Selectable{
             Point textPosition = getAlignedTextPosition(g2d);
 //            Point textPosition = getAlignedTextPos(g2d);
 //            g2d.drawString(this.model.getTitle(), textPosition.x, textPosition.y);
-            drawer.drawHtml(g2d, getModel().getTitle(), textPosition.x, textPosition.y);
+            drawer.drawHtml(g2d, getModel().getFormattedTitle(), textPosition.x, textPosition.y);
         }
     }
 
@@ -256,7 +256,7 @@ public class NodeView extends JPanel implements Selectable{
     @Deprecated
     private Point getAlignedTextPos(Graphics2D g2d) {
         Rectangle2D textArea = getTextArea();
-        Rectangle2D bounds = g2d.getFontMetrics().getStringBounds(model.getTitle(), g2d);
+        Rectangle2D bounds = g2d.getFontMetrics().getStringBounds(model.getFormattedTitle(), g2d);
         if(bounds.getHeight() > textArea.getHeight()) {
             textArea = getMaximumTextArea();
         }
@@ -271,7 +271,7 @@ public class NodeView extends JPanel implements Selectable{
     @Deprecated
     private Point getAlignedTextPosition(Graphics2D g2d) {
         Rectangle2D textArea = getTextArea();
-        Dimension dim = drawer.computeTextSize(getModel().getTitle());
+        Dimension dim = drawer.computeTextSize(getModel().getFormattedTitle());
 
         // TODO: test this one
         if(dim.getHeight() > textArea.getHeight()) {

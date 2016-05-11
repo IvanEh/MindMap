@@ -4,6 +4,7 @@ import com.gmail.at.ivanehreshi.MindMapApplication;
 import com.gmail.at.ivanehreshi.customui.NodeStylesheet;
 import com.gmail.at.ivanehreshi.customui.NodeView;
 import com.gmail.at.ivanehreshi.utils.ConcatIter;
+import com.gmail.at.ivanehreshi.utils.HtmlDrawer;
 import com.gmail.at.ivanehreshi.utils.Resources;
 import com.gmail.at.ivanehreshi.utils.Utilities;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -74,7 +75,7 @@ public class NodeModel implements Iterable<NodeModel>{
             int border = computeTotalInset() + NodeView.BORDER_THICKNESS;
             border *= 2;
 
-            Dimension dim = Utilities.getHtmlDrawer().computeTextSize(getTitle());
+            Dimension dim = Utilities.getHtmlDrawer().computeTextSize(getFormattedTitle());
             setSize(dim.width + border, dim.height + border);
 
         } else {
@@ -462,8 +463,14 @@ public class NodeModel implements Iterable<NodeModel>{
         throw new NotImplementedException();
     }
 
-    public Object getFormattedTitle() {
-        throw new NotImplementedException();
+    public String getFormattedTitle() {
+        return HtmlDrawer.encloseWithHtml(
+          HtmlDrawer.encloseWithFont(getTitle(),
+                  getProps().getFontSize(),
+                  getProps().getFontName(),
+                  getProps().getNodeColor()
+                  )
+        );
     }
 
     protected void fireChangeEvent() {

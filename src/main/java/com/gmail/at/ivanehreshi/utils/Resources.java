@@ -10,9 +10,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Resources {
+    private static Resources instance;
     private Map<String, BufferedImage> imageMap;
 
-    public Resources() {
+    private Resources() {
         this.imageMap = new HashMap<>();
     }
 
@@ -45,11 +46,15 @@ public class Resources {
             }
         }
 
-//        if((imageIcon.getImageLoadStatus() & MediaTracker.COMPLETE) == MediaTracker.COMPLETE) {
             return bufferedImage;
-//        } else  {
-//            return null;
-//        }
     }
+
+    public static Resources getInstance() {
+        if(instance == null) {
+            instance = new Resources();
+        }
+        return instance;
+    }
+
 
 }

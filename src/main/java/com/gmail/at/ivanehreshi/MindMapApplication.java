@@ -19,13 +19,9 @@ public class MindMapApplication extends JFrame {
 
     public JMenuBar menuBar;
     public JPanel rootLayoutPanel;
-    private Resources resources;
 
     private MindMapApplication() {
         super(FRAME_TITLE);
-
-        this.resources = new Resources();
-
         // TODO: replace setSize with pack()
         this.setSize(WINDOW_SIZE);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -34,9 +30,6 @@ public class MindMapApplication extends JFrame {
         initGui();
     }
 
-    public Resources getResources() {
-        return resources;
-    }
 
     public static UndoManager getUndoManagerInstance() {
         if(undoManagerInstance == null) {

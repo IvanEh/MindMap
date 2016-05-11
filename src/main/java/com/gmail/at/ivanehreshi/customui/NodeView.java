@@ -6,6 +6,7 @@ import com.gmail.at.ivanehreshi.customui.controllers.NodeViewController;
 import com.gmail.at.ivanehreshi.customui.controllers.ResizeController;
 import com.gmail.at.ivanehreshi.models.NodeModel;
 import com.gmail.at.ivanehreshi.utils.HtmlDrawer;
+import com.gmail.at.ivanehreshi.utils.Resources;
 import com.gmail.at.ivanehreshi.utils.Selectable;
 import com.gmail.at.ivanehreshi.utils.Utilities;
 
@@ -245,7 +246,7 @@ public class NodeView extends JPanel implements Selectable{
         if(cachedImage != null) {
             bufferedImage = cachedImage;
         } else {
-            bufferedImage = MindMapApplication.getInstance().getResources()
+            bufferedImage = Resources.getInstance()
                     .getImage(getModel().getImagePath(), true);
         }
 
@@ -321,8 +322,8 @@ public class NodeView extends JPanel implements Selectable{
     public void invalidate() {
         super.invalidate();
         if(getModel() != null && getModel().isImageNode()) {
-            BufferedImage bufferedImage = MindMapApplication.getInstance().
-                    getResources().getImage(getModel().getImagePath(), false);
+            BufferedImage bufferedImage = Resources.getInstance()
+                    .getImage(getModel().getImagePath(), false);
             if(bufferedImage != null) {
                 Rectangle activeArea = activeArea();
                 cachedImage = Utilities.resize(bufferedImage, activeArea.width, activeArea.height);

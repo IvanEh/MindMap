@@ -4,6 +4,7 @@ import com.gmail.at.ivanehreshi.MindMapApplication;
 import com.gmail.at.ivanehreshi.customui.NodeStylesheet;
 import com.gmail.at.ivanehreshi.customui.NodeView;
 import com.gmail.at.ivanehreshi.utils.ConcatIter;
+import com.gmail.at.ivanehreshi.utils.Resources;
 import com.gmail.at.ivanehreshi.utils.Utilities;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -52,8 +53,15 @@ public class NodeModel implements Iterable<NodeModel>{
         updateModelPreferredSize();
     }
 
-
     public void updateModelPreferredSize() {
+        updateModelPreferredSize(false);
+    }
+
+
+    public void updateModelPreferredSize(boolean force) {
+        if(!isAutoResizeEnabled() && !force)
+            return;
+
         if(isTextNode()) {
 //            AffineTransform affinetransform = getCachedFont().getTransform();
 //            FontRenderContext frc = new FontRenderContext(affinetransform, true, true);
@@ -70,8 +78,11 @@ public class NodeModel implements Iterable<NodeModel>{
             setSize(dim.width + border, dim.height + border);
 
         } else {
-            BufferedImage image = MindMapApplication.getInstance().getResources()
+            BufferedImage image = Resources.getInstance()
                         .getImage(getImagePath(), false);
+            if(image == null) {
+                return;
+            }
             setSize(new Dimension(image.getWidth(), image.getHeight()));
         }
     }
@@ -214,7 +225,7 @@ public class NodeModel implements Iterable<NodeModel>{
         NodeModel highest = this.findHighest(side);
 
         int correction = lowest.getBottom() - highest.getY();
-        if(correction > 0) {
+        if(correction >= 0) {
             upBranch.translateUpperNodes(0, -correction);
             NodeModel firstModel = upBranch.getParent().firstModel(side);
             if(firstModel != null) {
@@ -238,7 +249,7 @@ public class NodeModel implements Iterable<NodeModel>{
         NodeModel highest = nextBranch.findHighest(side);
 
         int correction = lowest.getBottom() - highest.getY();
-        if(correction > 0) {
+        if(correction >= 0) {
             nextBranch.translateLowerNodes(0, correction);
             NodeModel lastModel = nextBranch.getParent().lastModel(side);
             if(lastModel != null) {
@@ -406,8 +417,37 @@ public class NodeModel implements Iterable<NodeModel>{
     }
 
     public void setTitle(String title) {
+        fireBeforeChangeEvent();
+
         this.title = title;
+        if(isAutoResizeEnabled()) {
+            int oldWidth = getWidth();
+            int oldHeight = getHeight();
+
+            updateModelPreferredSize();
+            pushNodesAfterResize(oldWidth, oldHeight);
+        }
+
         fireChangeEvent(new ChangeEvent(this, ChangeEvent.Cause.TITLE, null));
+    }
+
+    private void pushNodesAfterResize(int oldWidth, int oldHeight) {
+        int dw = (int) (getWidth() - oldWidth);
+        // TODO: take into account dh, left and right nodes
+        int dh = (int) (getHeight() - oldHeight);
+
+        if(dw < 0)
+            dw*= 0;
+
+        final int finalDw = dw;
+        if(isLeft()) {
+            translateAbs(-dw, 0); // TODO: need fix0?
+        } else if (isRight()) {
+            getRightNodes().forEach(m -> m.translateAbs(finalDw, 0));
+        } else {
+            translateAbs(-finalDw/2, 0);
+            getRightNodes().forEach(m -> m.translateAbs(finalDw, 0));
+        }
     }
 
     public String getContent() {
@@ -712,7 +752,7 @@ public class NodeModel implements Iterable<NodeModel>{
     public void setSize(int width, int height) {
         this.width = (int) width;
         this.height = (int) height;
-    }
+           }
 
     public void setSize(Dimension size) {
         setSize((int) size.getWidth(), (int) size.getHeight());
@@ -730,8 +770,24 @@ public class NodeModel implements Iterable<NodeModel>{
         return imagePath;
     }
 
-    public void setImagePath(String imagePath) {
+    public BufferedImage getImage() {
+        return Resources.getInstance().getImage(imagePath, true);
+    }
+
+    public void setImagePath(String imagePath, boolean updateSize) {
         this.imagePath = imagePath;
+        if(updateSize) {
+            Resources.getInstance().loadImage(getImagePath());
+            int oldWidth = getWidth();
+            int oldHeight = getHeight();
+
+            updateModelPreferredSize();
+            pushNodesAfterResize(oldWidth, oldHeight);
+        }
+    }
+
+    public void setImagePath(String imagePath) {
+        setImagePath(imagePath, false);
     }
 
     public boolean isTextNode() {

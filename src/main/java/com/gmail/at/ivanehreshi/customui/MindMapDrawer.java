@@ -221,30 +221,8 @@ public class MindMapDrawer extends JPanel implements MindMapController {
 
     public void onModelChangeTitle(NodeModel.ChangeEvent ch) {
         NodeModel model = ch.getSource();
-        int oldWidth = model.getWidth();
-        int oldHeight = model.getHeight();
 
-        // TODO: move to onModelChangeSize
-        if(model.isAutoResizeEnabled()) {
-            model.updateModelPreferredSize();
-        }
-        int dw = (int) (model.getWidth() - oldWidth);
-        int dh = (int) (model.getHeight() - oldHeight);
-
-        if(dw < 0)
-            dw*= 0;
-
-        final int finalDw = dw;
-        if(model.isLeft()) {
-            model.translateAbs(-dw, 0); // TODO: need fix0?
-        } else if (model.isRight()) {
-            model.getRightNodes().forEach(m -> m.translateAbs(finalDw, 0));
-        } else {
-            model.translateAbs(-finalDw/2, 0);
-            model.getRightNodes().forEach(m -> m.translateAbs(finalDw, 0));
-        }
-
-        doLayout();
+        validate();
     }
 
     @Override

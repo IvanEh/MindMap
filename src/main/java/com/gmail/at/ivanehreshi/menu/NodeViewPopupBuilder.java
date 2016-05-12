@@ -4,6 +4,7 @@ import com.gmail.at.ivanehreshi.Strings;
 import com.gmail.at.ivanehreshi.actions.YAction;
 import com.gmail.at.ivanehreshi.actions.mindmap.AddNode;
 import com.gmail.at.ivanehreshi.actions.mindmap.AddNodeWithImage;
+import com.gmail.at.ivanehreshi.actions.mindmap.AddNodeWithTable;
 import com.gmail.at.ivanehreshi.actions.mindmap.AutoResizeAction;
 import com.gmail.at.ivanehreshi.customui.NodeView;
 import com.gmail.at.ivanehreshi.models.NodeModel;
@@ -52,6 +53,22 @@ public class NodeViewPopupBuilder {
             }
         });
 
+        popup.add(addNode);
+
+        return addNode;
+    }
+
+    JMenuItem buildAddNodeWithTable() {
+        JMenuItem addNode = new JMenuItem(new AddNodeWithTable() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JMenuItem source = (JMenuItem) e.getSource();
+                JPopupMenu popup = (JPopupMenu) source.getParent();
+                NodeView view = (NodeView) popup.getInvoker();
+
+                super.actionPerformed(new ActionEvent(view, ActionEvent.ACTION_FIRST, ""));
+            }
+        });
         popup.add(addNode);
 
         return addNode;
@@ -142,6 +159,7 @@ public class NodeViewPopupBuilder {
             builder.buildPopup();
             builder.buildAddNode();
             builder.buildAddNodeWithImage();
+            builder.buildAddNodeWithTable();
             builder.buildRemoveNode();
             builder.buildSeperator();
             builder.buildCopyCutBuffer();

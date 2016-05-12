@@ -91,6 +91,7 @@ public class NodeView extends JPanel implements Selectable{
             throw new IllegalStateException("");
         }
 
+        // TODO: try comment the line below
         mindMapController.onNodeModelCreated(model);
         return mindMapController.onNodeModelInsert(this, model);
     }
@@ -115,8 +116,12 @@ public class NodeView extends JPanel implements Selectable{
 
     @Override
     public void setSize(int width, int height) {
+        int dw = width - getWidth();
+        int dh = height - getHeight();
         super.setSize(width, height);
-        getModel().setSize(getSize());
+        if(mindMapController != null) {
+            mindMapController.onViewChangeSize(this, dw, dh);
+        }
     }
 
     @Deprecated

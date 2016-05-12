@@ -50,7 +50,6 @@ public class NodeModel implements Iterable<NodeModel>{
         pos = new Point();
         props = new NodeStylesheet();
 
-        cacheFont();
         updateModelPreferredSize();
     }
 
@@ -64,14 +63,6 @@ public class NodeModel implements Iterable<NodeModel>{
             return;
 
         if(isTextNode()) {
-//            AffineTransform affinetransform = getCachedFont().getTransform();
-//            FontRenderContext frc = new FontRenderContext(affinetransform, true, true);
-//            int textwidth = (int) (getCachedFont().getStringBounds(title, frc).getWidth());
-//            int textheight = (int) (getCachedFont().getStringBounds(title, frc).getHeight());
-//            this.height = Math.max(textheight + computeTotalInset() * 3 + NodeView.BORDER_THICKNESS,
-//                    getProps().getMinimumHeight());
-//            this.width = Math.max(textwidth * 3 / 2 + 3 * NodeView.BORDER_THICKNESS,
-//                    getProps().getMinimumWidth());
             int border = computeTotalInset() + NodeView.BORDER_THICKNESS;
             border *= 2;
 
@@ -785,6 +776,8 @@ public class NodeModel implements Iterable<NodeModel>{
     }
 
     public void setImagePath(String imagePath, boolean updateSize) {
+        fireBeforeChangeEvent();
+
         this.imagePath = imagePath;
         if(updateSize) {
             Resources.getInstance().loadImage(getImagePath());
@@ -794,6 +787,8 @@ public class NodeModel implements Iterable<NodeModel>{
             updateModelPreferredSize();
             pushNodesAfterResize(oldWidth, oldHeight);
         }
+
+
     }
 
     public void setImagePath(String imagePath) {
@@ -802,6 +797,11 @@ public class NodeModel implements Iterable<NodeModel>{
 
     public boolean isTextNode() {
         return !isImageNode();
+    }
+
+    public void fix() {
+        fix0(NodeSide.LEFT);
+        fix0(NodeSide.RIGHT);
     }
 
     public interface BeforeChangeListener {
@@ -815,7 +815,8 @@ public class NodeModel implements Iterable<NodeModel>{
         public enum Cause {
             TITLE,
             CONTENT,
-            BOUNDS
+            BOUNDS,
+            IMAGE
         }
         /**
          * Constructs a ChangeEvent object.

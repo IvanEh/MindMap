@@ -56,6 +56,7 @@ public class Workspace extends JPanel {
         NodeView z = second.insertNewNode("Z");
         TableNodeView zzz = (TableNodeView)second.insertExisting(new TableNodeModel(null, NodeModel.NodeSide.LEFT, 2, 2));
         z.getModel().setImagePath("/home/ivaneh/plus.png", true);
+        z.getModel().fix0(NodeModel.NodeSide.RIGHT);
 
         trView = x;
 //

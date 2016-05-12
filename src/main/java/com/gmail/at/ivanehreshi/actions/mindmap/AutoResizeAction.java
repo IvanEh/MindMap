@@ -27,6 +27,7 @@ public class AutoResizeAction extends YAction {
             public void redo() {
                 NodeView nodeView = (NodeView) event.getSource();
                 nodeView.getModel().updateModelPreferredSize(true);
+                nodeView.getModel().setAutoResize(true);
                 nodeView.revalidate();
             }
         };

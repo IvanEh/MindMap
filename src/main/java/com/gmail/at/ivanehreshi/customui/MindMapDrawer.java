@@ -177,7 +177,6 @@ public class MindMapDrawer extends JPanel implements MindMapController {
 
     @Override
     public void onViewChangeSize(NodeView view, int dx, int dy) {
-        view.getModel().setAutoResize(false);
     }
 
 
@@ -295,6 +294,10 @@ public class MindMapDrawer extends JPanel implements MindMapController {
         return retView;
     }
 
+    /**
+     * Create a view which will be managed by the MindMapController.
+     * Also it correctly positions it and its neighbors
+     */
     private NodeView createLaidOutView(NodeView parent, NodeModel model) {
         Point anchor;
 
@@ -332,6 +335,7 @@ public class MindMapDrawer extends JPanel implements MindMapController {
             retView.getModel().setNodePos(anchor);
         }
 
+        retView.getModel().fix();
         parent.revalidate();
         return retView;
     }

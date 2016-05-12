@@ -38,8 +38,6 @@ public class NodeViewController extends MouseAdapter{
             lastPosition = e.getPoint();
         }
 
-
-
         int dx = e.getX() - lastPosition.x;
         int dy = e.getY() - lastPosition.y;
 
@@ -84,9 +82,9 @@ public class NodeViewController extends MouseAdapter{
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if(ignoreEvents) {
-            return;
-        }
+//        if(ignoreEvents) {
+//            return;
+//        }
         lastPosition = null;
 
         MindMapDrawer mmd = getMmd(getNodeView(e));

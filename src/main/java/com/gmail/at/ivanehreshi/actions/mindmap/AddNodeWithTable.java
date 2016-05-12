@@ -15,8 +15,6 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 public class AddNodeWithTable extends YAction {
-    private String pathToImage;
-
     public AddNodeWithTable() {
         super(Strings.Popup.ADD_NODE_WITH_TABLE);
     }
@@ -40,9 +38,6 @@ public class AddNodeWithTable extends YAction {
             public void redo() {
                 this.createdView =
                         target.insertNewNode(new TableNodeModel(null, NodeModel.NodeSide.LEFT, rows, columns));
-                if(pathToImage != null) {
-                    createdView.getModel().setImagePath(pathToImage, true);
-                }
             }
         };
     }

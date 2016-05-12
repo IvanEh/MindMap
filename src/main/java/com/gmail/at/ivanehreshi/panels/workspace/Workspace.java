@@ -1,11 +1,10 @@
 package com.gmail.at.ivanehreshi.panels.workspace;
 
-import com.gmail.at.ivanehreshi.MindMapApplication;
-import com.gmail.at.ivanehreshi.actions.mindmap.AddNode;
 import com.gmail.at.ivanehreshi.customui.MindMapDrawer;
 import com.gmail.at.ivanehreshi.customui.NodeView;
-import com.gmail.at.ivanehreshi.customui.controllers.MindMapMoveController;
+import com.gmail.at.ivanehreshi.customui.TableNodeView;
 import com.gmail.at.ivanehreshi.models.NodeModel;
+import com.gmail.at.ivanehreshi.models.TableNodeModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -55,6 +54,7 @@ public class Workspace extends JPanel {
         NodeView x = second.insertNewNode("X");
         NodeView y = second.insertNewNode("Y");
         NodeView z = second.insertNewNode("Z");
+        TableNodeView zzz = (TableNodeView)second.insertExisting(new TableNodeModel(null, NodeModel.NodeSide.LEFT, 2, 2));
         z.getModel().setImagePath("/home/ivaneh/plus.png", true);
 
         trView = x;

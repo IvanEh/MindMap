@@ -1,6 +1,9 @@
 package com.gmail.at.ivanehreshi.panels.toolbar;
 
 import com.gmail.at.ivanehreshi.MindMapApplication;
+import com.gmail.at.ivanehreshi.customui.TableNodeView;
+import com.gmail.at.ivanehreshi.models.NodeModel;
+import com.gmail.at.ivanehreshi.models.TableNodeModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,5 +31,6 @@ public class Toolbar extends JPanel{
 
         redoBtn = new JButton("->");
         add(redoBtn);
+
     }
 }

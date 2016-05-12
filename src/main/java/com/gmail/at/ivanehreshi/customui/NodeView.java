@@ -56,12 +56,23 @@ public class NodeView extends JPanel implements Selectable{
                             getHeight() - insets.top - insets.bottom);
     }
 
+    public Rectangle contentArea() {
+        Rectangle area = activeArea();
+        int thickness = getModel().getProps().getThickness();
+        area.x += thickness;
+        area.y += thickness;
+        area.width -= 2*thickness;
+        area.height-= 2*thickness;
+        return area;
+    }
+
     protected void setUpControllers() {
         nodeViewController = new NodeViewController();
         addMouseListener(nodeViewController);
         addMouseMotionListener(nodeViewController);
 
-        ResizeController resizeController = new ResizeController(6);
+        ResizeController resizeController
+                = new ResizeController(((ResizableBorder) getBorder()).getThickness());
         addMouseListener(resizeController);
         addMouseMotionListener(resizeController);
 
@@ -142,12 +153,21 @@ public class NodeView extends JPanel implements Selectable{
 
         drawBorder(g2d, insets, nodeThickness, outerBorder);
 
+        drawContent(g2d);
+
+    }
+
+    /**
+     * Method of drawing content of model. To support more
+     * drawing options this method could be overrided
+     * @param g2d
+     */
+    protected void drawContent(Graphics2D g2d) {
         if(getModel().isImageNode()) {
             drawImage(g2d);
         } else {
             drawTitle(g2d);
         }
-
     }
 
     private void drawBorder(Graphics2D g2d, Insets insets, int nodeThickness, int outerBorder) {

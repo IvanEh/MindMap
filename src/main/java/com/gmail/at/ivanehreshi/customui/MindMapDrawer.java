@@ -1,10 +1,12 @@
 package com.gmail.at.ivanehreshi.customui;
 
 import com.gmail.at.ivanehreshi.customui.controllers.ChangesTracker;
+import com.gmail.at.ivanehreshi.customui.controllers.FocusMonitor;
 import com.gmail.at.ivanehreshi.customui.controllers.MindMapController;
 import com.gmail.at.ivanehreshi.customui.controllers.MindMapMoveController;
 import com.gmail.at.ivanehreshi.menu.NodeViewPopupBuilder;
 import com.gmail.at.ivanehreshi.models.NodeModel;
+import com.gmail.at.ivanehreshi.models.TableNodeModel;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -27,6 +29,7 @@ public class MindMapDrawer extends JPanel implements MindMapController {
     private ChangesTracker<Point> positionTracker;
     private ChangesTracker<Dimension> dimensionTracker;
     private LightWeightNodeEditor nodeEditor;
+    private FocusMonitor focusMonitor;
 
     public MindMapDrawer(NodeModel rootModel) {
         setOpaque(false);
@@ -35,6 +38,8 @@ public class MindMapDrawer extends JPanel implements MindMapController {
         setLayout(new MindMapLayout());
         lineManager = new LineManager(this);
         setFocusable(true);
+
+        focusMonitor = new FocusMonitor();
 
         createGui();
         createDebugGui();
@@ -84,6 +89,10 @@ public class MindMapDrawer extends JPanel implements MindMapController {
         return (MindMapLayout) this.getLayout();
     }
 
+    public FocusMonitor getFocusMonitor() {
+        return focusMonitor;
+    }
+
     private void createModelProjection() {
         for(NodeModel model: this.model) {
             onNodeModelInsert(null, model);
@@ -91,7 +100,12 @@ public class MindMapDrawer extends JPanel implements MindMapController {
     }
 
     NodeView manageSingleModel(NodeModel model) {
-        NodeView view = new NodeView(model, this);
+        NodeView view;
+        if(model instanceof TableNodeModel) {
+            view = new TableNodeView((TableNodeModel)model, this);
+        } else {
+            view = new NodeView(model, this);
+        }
         if(model.isRootNode()) {
             rootNode = view;
         }
@@ -205,6 +219,10 @@ public class MindMapDrawer extends JPanel implements MindMapController {
             }
         }));
 
+        getFocusMonitor().monitor(retView);
+        if(retView instanceof TableNodeView) {
+            getFocusMonitor().monitor(((TableNodeView) retView).getTable());
+        }
         return retView;
     }
 
@@ -273,7 +291,7 @@ public class MindMapDrawer extends JPanel implements MindMapController {
         model.fix0(NodeModel.NodeSide.LEFT);
         model.fix0(NodeModel.NodeSide.RIGHT);
 
-
+        getFocusMonitor().monitor(retView);
         return retView;
     }
 

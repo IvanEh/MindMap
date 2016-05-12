@@ -76,4 +76,12 @@ public class ResizableBorder implements Border {
     public boolean isBorderOpaque() {
         return false;
     }
+
+    public void setThickness(int thickness) {
+        this.thickness = thickness;
+    }
+
+    public int getThickness() {
+        return thickness;
+    }
 }

@@ -73,7 +73,6 @@ public class NodeView extends JPanel implements Selectable{
         this.setSize(new Dimension(model.getWidth(), model.getHeight()));
         this.mindMapController = mindMapController;
 
-        setFont(model.getCachedFont());
     }
 
     public NodeView insertNewNode(NodeModel model) {

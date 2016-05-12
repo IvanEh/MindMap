@@ -5,10 +5,17 @@ import java.util.Map;
 import java.awt.Color;
 
 public class Stylesheet{
+    private Stylesheet parent;
+
     private Map<String, Object> properties;
 
     public Stylesheet() {
+        this(null);
+    }
+
+    public Stylesheet(Stylesheet parent) {
         properties = new HashMap<>();
+        this.parent = parent;
     }
 
     public Map<String, Object> getProperties() {
@@ -16,11 +23,30 @@ public class Stylesheet{
     }
 
     public Object get(String prop) {
-        return properties.get(prop);
+        Object property;
+        property = properties.get(prop);
+
+        if(property == null) {
+            property = parent.get(prop);
+        }
+
+        return property;
     }
 
     public Object put(String prop, Object val) {
         return properties.put(prop, val);
+    }
+
+    public Object toggle(String prop) {
+        Object prevVal = properties.get(prop);
+        if(prevVal == null)
+            return null;
+
+        if(prevVal instanceof Boolean) {
+            put(prop, !(boolean) prevVal);
+        }
+
+        return prevVal;
     }
 
     public Integer getInteger(String prop) {

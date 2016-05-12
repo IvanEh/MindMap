@@ -30,9 +30,28 @@ public class HtmlDrawer {
 
     public static String encloseWithFont(String s, int size, String face, Color color) {
         return String.format(
-            "<font size=%1$spx face=%2$s color=%3$s>%4$s</font>",
+            "<font size=%1$s face=%2$s color=%3$s>%4$s</font>",
                 size, face, hexColor(color), s
         );
+    }
+
+    public static String encloseWithDecoration(String s, boolean italic,
+                                               boolean bold, boolean underscored) {
+        String begin = "";
+        String end = "";
+        if(italic) {
+            begin += "<i>";
+            end += "</i>";
+        }
+        if(bold) {
+            begin += "<b>";
+            end += "</b>";
+        }
+        if(underscored) {
+            begin += "<u>";
+            end += "</u>";
+        }
+        return begin + s + end;
     }
 
     public static String hexColor(Color color) {

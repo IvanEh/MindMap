@@ -18,4 +18,12 @@ public class Utilities {
     public static HtmlDrawer getHtmlDrawer() {
         return htmlDrawer;
     }
+
+    public static Integer[] genRangeArr(int begin, int end) {
+        Integer[] arr = new Integer[end - begin + 1];
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = begin + i;
+        }
+        return arr;
+    }
 }

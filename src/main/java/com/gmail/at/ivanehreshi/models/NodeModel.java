@@ -464,12 +464,15 @@ public class NodeModel implements Iterable<NodeModel>{
     }
 
     public String getFormattedTitle() {
-        return HtmlDrawer.encloseWithHtml(
-          HtmlDrawer.encloseWithFont(getTitle(),
+        return
+          HtmlDrawer.encloseWithHtml(
+           HtmlDrawer.encloseWithDecoration(
+            HtmlDrawer.encloseWithFont(getTitle(),
                   getProps().getFontSize(),
                   getProps().getFontName(),
-                  getProps().getNodeColor()
-                  )
+                  getProps().getFontColor()
+                  ),
+            props.getItalicTitle(), props.getBoldTitle(), props.getUnderscoredTitle())
         );
     }
 

@@ -161,6 +161,11 @@ public class MindMapDrawer extends JPanel implements MindMapController {
         doLayout();
     }
 
+    @Override
+    public void onViewChangeSize(NodeView view, int dx, int dy) {
+        view.getModel().setAutoResize(false);
+    }
+
 
     protected Map<NodeModel, NodeView> getModelToViewMap() {
         return modelToViewMap;

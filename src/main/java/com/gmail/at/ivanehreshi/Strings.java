@@ -14,5 +14,6 @@ public class Strings {
         public static final String REMOVE_NODE = "Видалити";
         public static final String CUT_NODE = "Вирізати";
         public static final String INSERT_NODE = "Вставити";
+        public static final String AUTORESIZE = "Оновити розмір";
     }
 }

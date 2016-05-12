@@ -3,6 +3,7 @@ package com.gmail.at.ivanehreshi.menu;
 import com.gmail.at.ivanehreshi.Strings;
 import com.gmail.at.ivanehreshi.actions.YAction;
 import com.gmail.at.ivanehreshi.actions.mindmap.AddNode;
+import com.gmail.at.ivanehreshi.actions.mindmap.AutoResizeAction;
 import com.gmail.at.ivanehreshi.customui.NodeView;
 import com.gmail.at.ivanehreshi.models.NodeModel;
 import com.gmail.at.ivanehreshi.utils.CopyCutBuffer;
@@ -85,6 +86,21 @@ public class NodeViewPopupBuilder {
         return this.copyCutBuffer;
     }
 
+    public JMenuItem buildAutoResizeMenu() {
+        JMenuItem autoResize = new JMenuItem(new AutoResizeAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JMenuItem source = (JMenuItem) e.getSource();
+                JPopupMenu popup = (JPopupMenu) source.getParent();
+                NodeView view = (NodeView) popup.getInvoker();
+                super.actionPerformed(new ActionEvent(view, 0, ""));
+            }
+        });
+        popup.add(autoResize);
+
+        return autoResize;
+    }
+
     NodeView unwrapView(ActionEvent e) {
         JMenuItem source = (JMenuItem) e.getSource();
         JPopupMenu popup = (JPopupMenu) source.getParent();
@@ -104,6 +120,7 @@ public class NodeViewPopupBuilder {
             builder.buildRemoveNode();
             builder.buildCopyCutBuffer();
             builder.buildCutCopyInsertNode();
+            builder.buildAutoResizeMenu();
             return builder.getPopup();
         }
     }

@@ -4,6 +4,7 @@ import com.gmail.at.ivanehreshi.actions.Command;
 import com.gmail.at.ivanehreshi.customui.NodeView;
 import com.gmail.at.ivanehreshi.models.NodeModel;
 
+import javax.xml.soap.Node;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -41,6 +42,7 @@ public class ResizeController extends MouseAdapter {
 
         comp.setSize(newWidth, newHeight);
         if(comp instanceof NodeView) {
+            ((NodeView) comp).getMindMapController().onViewChangeSize((NodeView) comp, dw, dh);
             ((NodeView) comp).getModel().fix0(NodeModel.NodeSide.LEFT);
             ((NodeView) comp).getModel().fix0(NodeModel.NodeSide.RIGHT);
             comp.revalidate();

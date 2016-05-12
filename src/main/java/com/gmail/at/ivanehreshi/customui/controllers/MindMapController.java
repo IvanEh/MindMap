@@ -47,6 +47,7 @@ public interface MindMapController extends ChangeListener {
 
     NodeView onNodeModelInsertExisting(NodeView view, NodeModel model);
 
+    void onViewChangeSize(NodeView view, int dx, int dy);
 
 
 }

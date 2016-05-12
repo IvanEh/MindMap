@@ -57,4 +57,7 @@ public class Resources {
     }
 
 
+    public String workingDir() {
+        return "/";
+    }
 }

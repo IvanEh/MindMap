@@ -3,6 +3,7 @@ package com.gmail.at.ivanehreshi.menu;
 import com.gmail.at.ivanehreshi.Strings;
 import com.gmail.at.ivanehreshi.actions.YAction;
 import com.gmail.at.ivanehreshi.actions.mindmap.AddNode;
+import com.gmail.at.ivanehreshi.actions.mindmap.AddNodeWithImage;
 import com.gmail.at.ivanehreshi.actions.mindmap.AutoResizeAction;
 import com.gmail.at.ivanehreshi.customui.NodeView;
 import com.gmail.at.ivanehreshi.models.NodeModel;
@@ -24,6 +25,23 @@ public class NodeViewPopupBuilder {
 
     JMenuItem buildAddNode() {
         JMenuItem addNode = new JMenuItem(new AddNode() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JMenuItem source = (JMenuItem) e.getSource();
+                JPopupMenu popup = (JPopupMenu) source.getParent();
+                NodeView view = (NodeView) popup.getInvoker();
+
+                super.actionPerformed(new ActionEvent(view, ActionEvent.ACTION_FIRST, ""));
+            }
+        });
+
+        popup.add(addNode);
+
+        return addNode;
+    }
+
+    JMenuItem buildAddNodeWithImage() {
+        JMenuItem addNode = new JMenuItem(new AddNodeWithImage() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JMenuItem source = (JMenuItem) e.getSource();
@@ -101,6 +119,12 @@ public class NodeViewPopupBuilder {
         return autoResize;
     }
 
+    public JSeparator buildSeperator() {
+        JSeparator separator = new JSeparator();
+        popup.add(separator);
+        return separator;
+    }
+
     NodeView unwrapView(ActionEvent e) {
         JMenuItem source = (JMenuItem) e.getSource();
         JPopupMenu popup = (JPopupMenu) source.getParent();
@@ -117,9 +141,12 @@ public class NodeViewPopupBuilder {
             NodeViewPopupBuilder builder = new NodeViewPopupBuilder();
             builder.buildPopup();
             builder.buildAddNode();
+            builder.buildAddNodeWithImage();
             builder.buildRemoveNode();
+            builder.buildSeperator();
             builder.buildCopyCutBuffer();
             builder.buildCutCopyInsertNode();
+            builder.buildSeperator();
             builder.buildAutoResizeMenu();
             return builder.getPopup();
         }

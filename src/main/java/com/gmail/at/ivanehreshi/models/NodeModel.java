@@ -322,6 +322,12 @@ public class NodeModel implements Iterable<NodeModel>{
         model.setNodeSide(side);
     }
 
+    public void addNode(int index, NodeModel removed, NodeSide nodeSide) {
+        getNodes(nodeSide).add(index, removed);
+        removed.parentNode = this;
+        removed.setNodeSide(nodeSide);
+    }
+
     // TODO: fix typo
     // TODO: make a general version for both sides
     public boolean hasChildren(NodeSide side) {
@@ -816,6 +822,7 @@ public class NodeModel implements Iterable<NodeModel>{
         fix0(NodeSide.LEFT);
         fix0(NodeSide.RIGHT);
     }
+
 
     public interface BeforeChangeListener {
         void beforeChange(NodeModel model);

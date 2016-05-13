@@ -43,6 +43,11 @@ public interface MindMapController extends ChangeListener {
 
     void onModelChangeTitle(NodeModel.ChangeEvent ch);
 
+    /**
+     * Fired when the user tries to remove a node
+     * @param view
+     * @return
+     */
     NodeModel onViewRemove(NodeView view);
 
     NodeView onNodeModelInsertExisting(NodeView view, NodeModel model);

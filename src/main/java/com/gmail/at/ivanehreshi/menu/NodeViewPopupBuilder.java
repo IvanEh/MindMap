@@ -2,10 +2,7 @@ package com.gmail.at.ivanehreshi.menu;
 
 import com.gmail.at.ivanehreshi.Strings;
 import com.gmail.at.ivanehreshi.actions.YAction;
-import com.gmail.at.ivanehreshi.actions.mindmap.AddNode;
-import com.gmail.at.ivanehreshi.actions.mindmap.AddNodeWithImage;
-import com.gmail.at.ivanehreshi.actions.mindmap.AddNodeWithTable;
-import com.gmail.at.ivanehreshi.actions.mindmap.AutoResizeAction;
+import com.gmail.at.ivanehreshi.actions.mindmap.*;
 import com.gmail.at.ivanehreshi.customui.NodeView;
 import com.gmail.at.ivanehreshi.models.NodeModel;
 import com.gmail.at.ivanehreshi.utils.CopyCutBuffer;
@@ -75,14 +72,21 @@ public class NodeViewPopupBuilder {
     }
 
     JMenuItem buildRemoveNode() {
-        JMenuItem menu = new JMenuItem(new YAction(Strings.Popup.REMOVE_NODE) {
+//        JMenuItem menu = new JMenuItem(new YAction(Strings.Popup.REMOVE_NODE) {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                NodeView view = unwrapView(e);
+//                view.remove();
+//            }
+//        });
+//
+        JMenuItem menu = new JMenuItem(new RemoveNodes() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 NodeView view = unwrapView(e);
-                view.remove();
+                super.actionPerformed(new ActionEvent(view, 0, ""));
             }
         });
-
         popup.add(menu);
 
         return menu;

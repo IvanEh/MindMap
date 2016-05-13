@@ -95,7 +95,8 @@ public class MindMapDrawer extends JPanel implements MindMapController {
         }
     }
 
-    NodeView manageSingleModel(NodeModel model) {
+    // TODO: encapsulate
+    public NodeView manageSingleModel(NodeModel model) {
         NodeView view;
         if(model instanceof TableNodeModel) {
             view = new TableNodeView((TableNodeModel)model, this);
@@ -109,6 +110,21 @@ public class MindMapDrawer extends JPanel implements MindMapController {
         modelToViewMap.put(model, view);
         add(view);
         return view;
+    }
+
+    /**
+     * A convenience method for adding an existing node
+     * The user should guarantee that the parent is already created
+     * @param model
+     * @return
+     */
+    public NodeView addNode(NodeModel model) {
+        for (NodeModel currModel: model) {
+            NodeView view = manageSingleModel(currModel);
+            view.setVisible(true);
+        }
+
+        return getNodeViewByModel(model);
     }
 
     private void reset() {
@@ -287,6 +303,8 @@ public class MindMapDrawer extends JPanel implements MindMapController {
         model.fix0(NodeModel.NodeSide.RIGHT);
 
         getFocusMonitor().monitor(retView);
+
+        retView.setVisible(true);
         return retView;
     }
 

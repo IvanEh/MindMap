@@ -1,23 +1,18 @@
 package com.gmail.at.ivanehreshi.customui.controllers;
 
 import com.gmail.at.ivanehreshi.MindMapApplication;
-import com.gmail.at.ivanehreshi.actions.UndoableCommand;
-import com.gmail.at.ivanehreshi.actions.mindmap.AddNode;
-import com.gmail.at.ivanehreshi.actions.mindmap.EditNodeTitle;
 import com.gmail.at.ivanehreshi.customui.MindMapDrawer;
 import com.gmail.at.ivanehreshi.customui.NodeView;
-import com.gmail.at.ivanehreshi.models.NodeModel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 
 public class NodeViewController extends MouseAdapter{
     Point lastPosition = null;
-    boolean ignoreEvents = false;
+    boolean ignoreDragEvents = false;
 
     public NodeView getNodeView(MouseEvent e) {
         NodeView nodeView = (NodeView) e.getSource();
@@ -26,7 +21,7 @@ public class NodeViewController extends MouseAdapter{
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        if(ignoreEvents) {
+        if(ignoreDragEvents) {
             return;
         }
 
@@ -34,6 +29,10 @@ public class NodeViewController extends MouseAdapter{
             return;
         }
 
+        onMove(e);
+    }
+
+    protected void onMove(MouseEvent e) {
         if(lastPosition == null) {
             lastPosition = e.getPoint();
         }
@@ -47,11 +46,12 @@ public class NodeViewController extends MouseAdapter{
     @Override
     public void mousePressed(MouseEvent e) {
         getMmd(getNodeView(e)).getPositionTracker().startTracking();
+
         if(!getNodeView(e).activeArea().contains(e.getPoint())) {
-            ignoreEvents = true;
+            ignoreDragEvents = true;
             return;
         }
-        ignoreEvents = false;
+        ignoreDragEvents = false;
 
     }
 
@@ -59,34 +59,49 @@ public class NodeViewController extends MouseAdapter{
     // TODO: only right button
     @Override
     public void mouseClicked(MouseEvent e) {
-        if(ignoreEvents) {
+        if(ignoreDragEvents) {
             return;
         }
+
         NodeView view = getNodeView(e);
         view.requestFocus();
 
         if(e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
-            getMmd(view).getNodeEditor().edit(view);
+            onEdit(view);
         }
         if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 1){
-            if((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK) {
-                view.setSelected(!view.isSelected(), true);
-            } else {
-                view.setSelected(!view.isSelected(), false);
-            }
+            onSelect(e, view);
         }
         if(SwingUtilities.isRightMouseButton(e)) {
-            view.getMindMapController().onModelViewContextMenu(view, e.getX(), e.getY());
+            onContextMenu(e, view);
         }
+    }
+
+    protected void onContextMenu(MouseEvent e, NodeView view) {
+        view.getMindMapController().onModelViewContextMenu(view, e.getX(), e.getY());
+    }
+
+    protected void onSelect(MouseEvent e, NodeView view) {
+        if((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK) {
+            view.setSelected(!view.isSelected(), true);
+        } else {
+            view.setSelected(!view.isSelected(), false);
+        }
+    }
+
+    protected void onEdit(NodeView view) {
+        getMmd(view).getNodeEditor().edit(view);
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-//        if(ignoreEvents) {
-//            return;
-//        }
         lastPosition = null;
 
+        onCreateUndoCommand(e);
+
+    }
+
+    protected void onCreateUndoCommand(MouseEvent e) {
         MindMapDrawer mmd = getMmd(getNodeView(e));
         mmd.getPositionTracker().stopTracking();
 
@@ -97,7 +112,6 @@ public class NodeViewController extends MouseAdapter{
         }
 
         mmd.getPositionTracker().clear();
-
     }
 
     protected MindMapDrawer getMmd(NodeView view) {

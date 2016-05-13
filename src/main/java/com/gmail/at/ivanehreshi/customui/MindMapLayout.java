@@ -49,7 +49,7 @@ public class MindMapLayout implements LayoutManager {
         } else if (comp instanceof LightWeightNodeEditor) {
             LightWeightNodeEditor nodeEditor = (LightWeightNodeEditor) comp;
             // TODO: remove magic numbers
-            int width = (int) Math.max(Math.min(100, nodeEditor.getMinimumSize().getWidth()), nodeEditor.getWidth());
+            int width = (int) Math.max(Math.min(200, nodeEditor.getMinimumSize().getWidth()), nodeEditor.getWidth());
             nodeEditor.setSize(width, (int) nodeEditor.getPreferredSize().getHeight());
         }
     }

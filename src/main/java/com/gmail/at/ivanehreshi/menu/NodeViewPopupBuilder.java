@@ -139,6 +139,30 @@ public class NodeViewPopupBuilder {
         return separator;
     }
 
+    public void buildSwapMenus() {
+        JMenuItem swapUp =  new JMenuItem(new Swap(Swap.Direction.UP) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JMenuItem source = (JMenuItem) e.getSource();
+                JPopupMenu popup = (JPopupMenu) source.getParent();
+                NodeView view = (NodeView) popup.getInvoker();
+                super.actionPerformed(new ActionEvent(view, 0, ""));
+            }
+        });
+        popup.add(swapUp);
+
+        JMenuItem swapDown = new JMenuItem(new Swap(Swap.Direction.DOWN) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JMenuItem source = (JMenuItem) e.getSource();
+                JPopupMenu popup = (JPopupMenu) source.getParent();
+                NodeView view = (NodeView) popup.getInvoker();
+                super.actionPerformed(new ActionEvent(view, 0, ""));
+            }
+        });
+        popup.add(swapDown);
+    }
+
     NodeView unwrapView(ActionEvent e) {
         JMenuItem source = (JMenuItem) e.getSource();
         JPopupMenu popup = (JPopupMenu) source.getParent();
@@ -163,6 +187,8 @@ public class NodeViewPopupBuilder {
             builder.buildCutCopyInsertNode();
             builder.buildSeperator();
             builder.buildAutoResizeMenu();
+            builder.buildSeperator();
+            builder.buildSwapMenus();
             return builder.getPopup();
         }
     }

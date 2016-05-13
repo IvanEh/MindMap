@@ -18,5 +18,7 @@ public class Strings {
         // TODO: rename to PASTE
         public static final String INSERT_NODE = "Вставити";
         public static final String AUTORESIZE = "Оновити розмір";
+        public static final String SWAP_UP = "Вверх";
+        public static final String SWAP_DOWN = "Вниз";
     }
 }

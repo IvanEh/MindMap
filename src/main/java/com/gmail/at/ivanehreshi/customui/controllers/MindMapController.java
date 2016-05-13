@@ -17,6 +17,9 @@ public interface MindMapController extends ChangeListener {
 
     ArrayList<NodeView> getSelection();
 
+    default NodeView getLastSelected() {
+        return getSelection().get(getSelection().size()-1);
+    }
     /**
      * Trigers when somebody want to focus on a node
      * @param view is a node that need to be focused

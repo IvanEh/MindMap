@@ -74,6 +74,8 @@ public class NodeViewController extends MouseAdapter{
         }
         if(SwingUtilities.isRightMouseButton(e)) {
             onContextMenu(e, view);
+            view.setSelected(true,
+                    (e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK );
         }
     }
 

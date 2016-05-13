@@ -15,6 +15,7 @@ public class Strings {
         public static final String ADD_NODE_WITH_TABLE = "Нова таблиця";
         public static final String REMOVE_NODE = "Видалити";
         public static final String CUT_NODE = "Вирізати";
+        // TODO: rename to PASTE
         public static final String INSERT_NODE = "Вставити";
         public static final String AUTORESIZE = "Оновити розмір";
     }

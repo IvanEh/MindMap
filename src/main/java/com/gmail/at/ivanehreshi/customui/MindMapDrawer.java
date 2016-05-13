@@ -54,7 +54,10 @@ public class MindMapDrawer extends JPanel implements MindMapController {
                 (model, bounds) -> {
                     model.setNodePos(bounds.position);
                     model.setSize(bounds.dimension);
-                    getNodeViewByModel(model).revalidate();
+                    NodeView nodeView = getNodeViewByModel(model);
+                    if(nodeView != null) {
+                        nodeView.revalidate();
+                    }
                 });
     }
 

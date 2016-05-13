@@ -85,26 +85,27 @@ public class NodeViewPopupBuilder {
     }
 
     public void buildCutCopyInsertNode() {
-        JMenuItem cut = new JMenuItem(new YAction(Strings.Popup.CUT_NODE) {
-
+        JMenuItem cut = new JMenuItem(new CutNode(copyCutBuffer) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                NodeView view = unwrapView(e);
-                NodeModel model = view.remove();
-                if(copyCutBuffer != null) {
-                    copyCutBuffer.cut(model);
-                }
+                JMenuItem source = (JMenuItem) e.getSource();
+                JPopupMenu popup = (JPopupMenu) source.getParent();
+                NodeView view = (NodeView) popup.getInvoker();
+
+                super.actionPerformed(new ActionEvent(view, ActionEvent.ACTION_FIRST, ""));
             }
         });
         popup.add(cut);
 
-        JMenuItem insert = new JMenuItem(new YAction(Strings.Popup.INSERT_NODE) {
+        JMenuItem insert = new JMenuItem(new PasteNode(copyCutBuffer) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                NodeView view = unwrapView(e);
+                JMenuItem source = (JMenuItem) e.getSource();
+                JPopupMenu popup = (JPopupMenu) source.getParent();
+                NodeView view = (NodeView) popup.getInvoker();
+
                 if (copyCutBuffer != null && copyCutBuffer.hasElement()) {
-                    NodeModel modelToInsert = copyCutBuffer.pop();
-                    view.insertExisting(modelToInsert);
+                    super.actionPerformed(new ActionEvent(view, ActionEvent.ACTION_FIRST, ""));
                 }
             }
         });

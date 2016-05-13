@@ -55,8 +55,6 @@ public class LightWeightNodeEditor extends JTextArea{
                     getTarget().getY() + activeArea.y + border);
         setSize(new Dimension(activeArea.width - 2*border,
                                      activeArea.height - 2*border));
-//        setSize(getMinimumSize());
-//        setSize(getPreferredSize());
     }
 
     public void edit(NodeView target) {;

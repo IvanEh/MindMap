@@ -1,6 +1,9 @@
 package com.gmail.at.ivanehreshi.customui.controllers;
 
+import com.gmail.at.ivanehreshi.MindMapApplication;
 import com.gmail.at.ivanehreshi.actions.Command;
+import com.gmail.at.ivanehreshi.actions.UndoableCommand;
+import com.gmail.at.ivanehreshi.customui.MindMapDrawer;
 import com.gmail.at.ivanehreshi.customui.NodeView;
 import com.gmail.at.ivanehreshi.models.NodeModel;
 
@@ -8,6 +11,7 @@ import javax.xml.soap.Node;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 public class ResizeController extends MouseAdapter {
     private final int activeFieldSize;
@@ -44,7 +48,7 @@ public class ResizeController extends MouseAdapter {
         if(comp instanceof NodeView) {
             ((NodeView) comp).getModel().setSize(newWidth, newHeight);
             ((NodeView) comp).getModel().setAutoResize(false);
-            ((NodeView) comp).getMindMapController().onViewChangeSize((NodeView) comp, dw, dh);
+//            ((NodeView) comp).getMindMapController().onViewChangeSize((NodeView) comp, dw, dh);
             ((NodeView) comp).getModel().fix0(NodeModel.NodeSide.LEFT);
             ((NodeView) comp).getModel().fix0(NodeModel.NodeSide.RIGHT);
             comp.revalidate();
@@ -57,8 +61,8 @@ public class ResizeController extends MouseAdapter {
     public void mouseReleased(MouseEvent e) {
         state = null;
         lastPosition = null;
-    }
 
+    }
 
     public State calcState(Point p, Component comp) {
         Rectangle southEast = new Rectangle(comp.getWidth() - activeFieldSize, comp.getHeight() - activeFieldSize,

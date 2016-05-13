@@ -55,6 +55,7 @@ public class AddNodeWithImage extends YAction {
                 this.createdView = target.insertNewNode("");
                 if(pathToImage != null) {
                     createdView.getModel().setImagePath(pathToImage, true);
+                    createdView.getModel().fix();
                 }
             }
         };

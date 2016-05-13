@@ -72,14 +72,6 @@ public class NodeViewPopupBuilder {
     }
 
     JMenuItem buildRemoveNode() {
-//        JMenuItem menu = new JMenuItem(new YAction(Strings.Popup.REMOVE_NODE) {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                NodeView view = unwrapView(e);
-//                view.remove();
-//            }
-//        });
-//
         JMenuItem menu = new JMenuItem(new RemoveNodes() {
             @Override
             public void actionPerformed(ActionEvent e) {

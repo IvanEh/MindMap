@@ -46,9 +46,13 @@ public class ResizeController extends MouseAdapter {
 
         // TODO: clean up code
         if(comp instanceof NodeView) {
+            int oldWidth = comp.getWidth();
+            int oldHeight = comp.getHeight();
+
             ((NodeView) comp).getModel().setSize(newWidth, newHeight);
+            ((NodeView) comp).getModel().updatePreferredSizeAndPush(false);
+            ((NodeView) comp).getModel().pushNodes(oldWidth, oldHeight);
             ((NodeView) comp).getModel().setAutoResize(false);
-//            ((NodeView) comp).getMindMapController().onViewChangeSize((NodeView) comp, dw, dh);
             ((NodeView) comp).getModel().fix0(NodeModel.NodeSide.LEFT);
             ((NodeView) comp).getModel().fix0(NodeModel.NodeSide.RIGHT);
             comp.revalidate();

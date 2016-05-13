@@ -1,6 +1,5 @@
 package com.gmail.at.ivanehreshi.models;
 
-import com.gmail.at.ivanehreshi.MindMapApplication;
 import com.gmail.at.ivanehreshi.customui.NodeStylesheet;
 import com.gmail.at.ivanehreshi.customui.NodeView;
 import com.gmail.at.ivanehreshi.utils.ConcatIter;
@@ -11,8 +10,6 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.awt.font.FontRenderContext;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -412,33 +409,41 @@ public class NodeModel implements Iterable<NodeModel>{
         fireBeforeChangeEvent();
 
         this.title = title;
-        if(isAutoResizeEnabled()) {
-            int oldWidth = getWidth();
-            int oldHeight = getHeight();
-
-            updateModelPreferredSize();
-            pushNodesAfterResize(oldWidth, oldHeight);
-        }
 
         fireChangeEvent(new ChangeEvent(this, ChangeEvent.Cause.TITLE, null));
     }
 
-    private void pushNodesAfterResize(int oldWidth, int oldHeight) {
+    public void updatePreferredSizeAndPush(boolean pushItself) {
+        updatePreferredSizeAndPush(false, pushItself);
+    }
+
+    public void updatePreferredSizeAndPush(boolean force, boolean pushItself) {
+        int oldWidth = getWidth();
+        int oldHeight = getHeight();
+
+        updateModelPreferredSize(force);
+
+        if(pushItself) {
+            int dw = getWidth() - oldWidth;
+            if(isLeft()) {
+                translateAbs(-dw, 0);
+            }
+        }
+
+        pushNodes(oldWidth, oldHeight);
+    }
+
+    public void pushNodes(int oldWidth, int oldHeight) {
         int dw = (int) (getWidth() - oldWidth);
         // TODO: take into account dh, left and right nodes
         int dh = (int) (getHeight() - oldHeight);
 
-        if(dw < 0)
-            dw*= 0;
-
         final int finalDw = dw;
-        if(isLeft()) {
-            translateAbs(-dw, 0); // TODO: need fix0?
-        } else if (isRight()) {
+        if (isRight()) {
             getRightNodes().forEach(m -> m.translateAbs(finalDw, 0));
         } else {
-            translateAbs(-finalDw/2, 0);
-            getRightNodes().forEach(m -> m.translateAbs(finalDw, 0));
+//            translateAbs(-finalDw/2, 0);
+//            getRightNodes().forEach(m -> m.translateAbs(finalDw, 0));
         }
     }
 
@@ -792,8 +797,8 @@ public class NodeModel implements Iterable<NodeModel>{
             int oldWidth = getWidth();
             int oldHeight = getHeight();
 
-            updateModelPreferredSize();
-            pushNodesAfterResize(oldWidth, oldHeight);
+            updatePreferredSizeAndPush(true);
+            pushNodes(oldWidth, oldHeight);
         }
 
 

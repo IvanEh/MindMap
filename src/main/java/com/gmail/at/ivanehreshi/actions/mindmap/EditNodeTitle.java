@@ -53,6 +53,7 @@ public class EditNodeTitle extends YAction {
                 }
 
                 view.getModel().setTitle(after);
+                view.getModel().updatePreferredSizeAndPush(true);
 
                 if(positionChange == null) {
                     tracker.stopTracking();

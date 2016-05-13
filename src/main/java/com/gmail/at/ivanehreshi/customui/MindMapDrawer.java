@@ -5,6 +5,7 @@ import com.gmail.at.ivanehreshi.customui.controllers.FocusMonitor;
 import com.gmail.at.ivanehreshi.customui.controllers.MindMapController;
 import com.gmail.at.ivanehreshi.customui.controllers.MindMapMoveController;
 import com.gmail.at.ivanehreshi.menu.NodeViewPopupBuilder;
+import com.gmail.at.ivanehreshi.models.BoundsPair;
 import com.gmail.at.ivanehreshi.models.NodeModel;
 import com.gmail.at.ivanehreshi.models.TableNodeModel;
 
@@ -26,8 +27,7 @@ public class MindMapDrawer extends JPanel implements MindMapController {
     NodeModel.NodeSide side = NodeModel.NodeSide.RIGHT;
     private JPopupMenu nodePopup = new NodeViewPopupBuilder.Director().build();
     private ArrayList<NodeView> selectedNodes = new ArrayList<>();
-    private ChangesTracker<Point> positionTracker;
-    private ChangesTracker<Dimension> dimensionTracker;
+    private ChangesTracker<BoundsPair> positionTracker;
     private LightWeightNodeEditor nodeEditor;
     private FocusMonitor focusMonitor;
 
@@ -50,16 +50,12 @@ public class MindMapDrawer extends JPanel implements MindMapController {
 
     private void createChangesTrackers() {
         positionTracker = new ChangesTracker<>(
-                model ->  model.getPosition(),
-                (model, prop) -> {
-                    model.setNodePos(prop);
+                model ->  new BoundsPair(model.getPosition(), model.getSize()),
+                (model, bounds) -> {
+                    model.setNodePos(bounds.position);
+                    model.setSize(bounds.dimension);
                     getNodeViewByModel(model).revalidate();
                 });
-
-        dimensionTracker = new ChangesTracker<>(
-                model -> model.getSize(),
-                (model, dim) -> model.setSize(dim)
-        );
     }
 
     private void setUpControllers() {
@@ -382,11 +378,7 @@ public class MindMapDrawer extends JPanel implements MindMapController {
         nodePopup.show(view, x, y);
     }
 
-    public ChangesTracker<Point> getPositionTracker() {
+    public ChangesTracker<BoundsPair> getPositionTracker() {
         return positionTracker;
-    }
-
-    public ChangesTracker<Dimension> getDimensionTracker() {
-        return dimensionTracker;
     }
 }

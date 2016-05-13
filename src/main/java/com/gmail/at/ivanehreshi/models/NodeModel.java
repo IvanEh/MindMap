@@ -471,6 +471,9 @@ public class NodeModel implements Iterable<NodeModel>{
         javax.swing.event.ChangeEvent event = new javax.swing.event.ChangeEvent(this);
         fireChangeEvent(event);
     }
+    private void fireChangeEvent(ChangeEvent.Cause cause) {
+        fireChangeEvent(new ChangeEvent(this, cause, null));
+    }
 
     protected void fireBeforeChangeEvent() {
         beforeChangeListeners.forEach(l -> l.beforeChange(this));
@@ -751,9 +754,14 @@ public class NodeModel implements Iterable<NodeModel>{
     }
 
     public void setSize(int width, int height) {
+        fireBeforeChangeEvent();
+
         this.width = (int) width;
         this.height = (int) height;
-           }
+
+        fireChangeEvent(ChangeEvent.Cause.BOUNDS);
+    }
+
 
     public void setSize(Dimension size) {
         setSize((int) size.getWidth(), (int) size.getHeight());

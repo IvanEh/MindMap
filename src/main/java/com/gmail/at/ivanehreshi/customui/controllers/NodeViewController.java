@@ -46,13 +46,13 @@ public class NodeViewController extends MouseAdapter{
 
     @Override
     public void mousePressed(MouseEvent e) {
+        getMmd(getNodeView(e)).getPositionTracker().startTracking();
         if(!getNodeView(e).activeArea().contains(e.getPoint())) {
             ignoreEvents = true;
             return;
         }
         ignoreEvents = false;
 
-        getMmd(getNodeView(e)).getPositionTracker().startTracking();
     }
 
 
